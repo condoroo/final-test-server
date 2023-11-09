@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/create-subscription', async (req, res) => {
-    const { userName, userEmail, unitPrice, interval, productName, secretKey } = req.body;
+    const { userName, userEmail, unitPrice, interval, productName, secretKey, currency } = req.body;
     console.log(typeof (unitPrice))
     const stripe = require('stripe')(`${secretKey}`);
 
@@ -33,7 +33,7 @@ app.post('/create-subscription', async (req, res) => {
         const priceData = {
             product: product.id,
             unit_amount: Math.floor(unitPrice * 1000) / 1000 * 100, // Price in cents (multiply by 100)
-            currency: 'usd', // You can adjust the currency
+            currency: currency, // You can adjust the currency
         };
 
         if (interval) {
