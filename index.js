@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/create-subscription', async (req, res) => {
-    const { userName, userEmail, unitPrice, interval, productName, secretKey, currency } = req.body;
+    const { userName, userEmail, unitPrice, interval, productName, secretKey, currency, reDirectUrl, imageUrl } = req.body;
     console.log(typeof (unitPrice))
     const stripe = require('stripe')(`${secretKey}`);
 
@@ -28,6 +28,11 @@ app.post('/create-subscription', async (req, res) => {
         const product = await stripe.products.create({
             name: productName,
             type: 'service', // You can adjust this based on your product type
+        });
+
+        // Attach the image to the product
+        await stripe.products.update(product.id, {
+            images: [imageUrl],
         });
 
         const priceData = {
@@ -57,8 +62,8 @@ app.post('/create-subscription', async (req, res) => {
 
             ],
             mode: 'subscription',
-            success_url: 'https://your-success-url.com',
-            cancel_url: 'https://your-cancel-url.com',
+            success_url: `${reDirectUrl}`,
+            cancel_url: `${reDirectUrl}`,
         });
 
         res.json({ checkoutUrl: session.url });
