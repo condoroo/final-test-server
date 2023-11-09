@@ -1,7 +1,6 @@
 // Import required modules
 const express = require('express');
 const cors = require('cors');
-const stripe = require('stripe')('sk_test_51M5vv4CLTcmkmHRYZkWtQyNXEjCP43tttOJZXjfQz5PoCOpXZK6cuZOtKR91YWnidNeWZasoQVI9DUxdmkg5nliB00Nh97yLKB');
 // Create an Express app
 const app = express();
 const port = 3000;
@@ -15,8 +14,9 @@ app.get('/', (req, res) => {
 });
 
 app.post('/create-subscription', async (req, res) => {
-    const { userName, userEmail, unitPrice, interval, productName } = req.body;
+    const { userName, userEmail, unitPrice, interval, productName, secretKey } = req.body;
     console.log(typeof (unitPrice))
+    const stripe = require('stripe')(`${secretKey}`);
 
     try {
         // Step 1: Create a customer
