@@ -114,7 +114,20 @@ app.get('/', (req, res) => {
 });
 
 app.post('/create-subscription', async (req, res) => {
-    const { userName, userEmail, unitPrice, interval, productName, secretKey, currency, reDirectUrl, imageUrl, recordId, billing_cycle_anchor } = req.body;
+    const {
+        userName,
+        userEmail,
+        unitPrice,
+        interval,
+        productName,
+        secretKey,
+        currency,
+        reDirectUrl,
+        imageUrl,
+        recordId,
+        billing_cycle_anchor,
+
+    } = req.body;
     console.log(typeof (unitPrice))
     const stripe = require('stripe')(`${secretKey}`);
 
@@ -126,6 +139,7 @@ app.post('/create-subscription', async (req, res) => {
 
     // Get the UNIX timestamp in seconds
     const unixTimestamp = Math.floor(dateObject.getTime() / 1000);
+
 
     try {
         // Step 1: Create a customer
@@ -161,6 +175,7 @@ app.post('/create-subscription', async (req, res) => {
         // Define the 'price' variable before using it
         const price = await stripe.prices.create(priceData);
 
+
         // Step 3: Create a checkout session
         const session = await stripe.checkout.sessions.create({
             customer: customer.id,
@@ -176,9 +191,12 @@ app.post('/create-subscription', async (req, res) => {
                 userName: userName,
             },
             mode: 'subscription',
-            billing_cycle_anchor: unixTimestamp,
+            subscription_data: {
+                billing_cycle_anchor: unixTimestamp
+            },
             success_url: `${reDirectUrl}`,
             cancel_url: `${reDirectUrl}`,
+
         });
 
         res.json({ checkoutUrl: session.url });
