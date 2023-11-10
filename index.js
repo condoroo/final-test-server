@@ -87,22 +87,14 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                     },
                 };
 
-                const response = await axios.patch(airtableURL, updateData, {
+                await axios.patch(airtableURL, updateData, {
                     headers: {
                         Authorization: `Bearer ${AIRTABLE_API_KEY}`,
                     },
                 });
 
-                if (response.status === 200) {
-                    res.json({
-                        message: 'Record updated successfully',
-                    });
-                } else {
-                    res.status(500).json({ error: 'Unable to update record' });
-                }
             } catch (error) {
-                console.error('Error updating Airtable record:', error);
-                res.status(500).json({ error: 'Unable to update record' });
+
             }
             // end update record
 
