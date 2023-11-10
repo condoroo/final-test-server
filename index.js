@@ -145,11 +145,9 @@ app.post('/create-subscription', async (req, res) => {
                     quantity: 1,
                 },
             ],
-            meta_data: [
-                {
-                    recordId: recordId,
-                }
-            ],
+            metadata: {
+                recordId: recordId, // Add metadata to the session
+            },
             mode: 'subscription',
             success_url: `${reDirectUrl}`,
             cancel_url: `${reDirectUrl}`,
