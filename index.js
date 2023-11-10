@@ -1,9 +1,20 @@
 // Import required modules
 const express = require('express');
 const cors = require('cors');
+const { default: axios } = require('axios');
 // Create an Express app
 const app = express();
 const port = 3000;
+
+//airTable api keys
+// Replace with your Airtable API key and base ID
+const AIRTABLE_API_KEY = 'patuzRRxeWLfrvmpv.410ced9c8d8678a66f37f90a2a29bbe35cefdcadd460535ae43c9e297b7b2fe1';
+const AIRTABLE_BASE_ID = 'appBwIpTiua9aUx8h';
+const AIRTABLE_TABLE_NAME = 'Leads tracker';
+//////////////////
+
+
+
 
 // Enable CORS for all routes
 app.use(cors());
@@ -46,6 +57,8 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (request, respon
         case 'customer.created':
             const customerCreated = event.data.object;
             // Then define and call a function to handle the event customer.created
+            const recordId = customerCreated.metadata.recordId;
+
             break;
         case 'customer.deleted':
             const customerDeleted = event.data.object;
@@ -101,9 +114,18 @@ app.get('/', (req, res) => {
 });
 
 app.post('/create-subscription', async (req, res) => {
-    const { userName, userEmail, unitPrice, interval, productName, secretKey, currency, reDirectUrl, imageUrl, recordId } = req.body;
+    const { userName, userEmail, unitPrice, interval, productName, secretKey, currency, reDirectUrl, imageUrl, recordId, billing_cycle_anchor } = req.body;
     console.log(typeof (unitPrice))
     const stripe = require('stripe')(`${secretKey}`);
+
+    // Split the date string into month, day, and year
+    const [month, day, year] = billing_cycle_anchor.split('/');
+
+    // Create a new Date object with the specified year, month (zero-based), and day
+    const dateObject = new Date(year, month - 1, day);
+
+    // Get the UNIX timestamp in seconds
+    const unixTimestamp = Math.floor(dateObject.getTime() / 1000);
 
     try {
         // Step 1: Create a customer
@@ -111,6 +133,7 @@ app.post('/create-subscription', async (req, res) => {
             email: userEmail,
             metadata: {
                 recordId: recordId,
+                userName: userName,
             }
         });
 
@@ -150,8 +173,10 @@ app.post('/create-subscription', async (req, res) => {
             ],
             metadata: {
                 recordId: recordId, // Add metadata to the session
+                userName: userName,
             },
             mode: 'subscription',
+            billing_cycle_anchor: unixTimestamp,
             success_url: `${reDirectUrl}`,
             cancel_url: `${reDirectUrl}`,
         });
@@ -162,6 +187,36 @@ app.post('/create-subscription', async (req, res) => {
         res.status(500).json({ error: 'An error occurred' });
     }
 });
+
+
+//AirTable test api
+
+app.get('/get-records', async (req, res) => {
+    try {
+        const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
+        const response = await axios.get(airtableURL, {
+            headers: {
+                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+            },
+        });
+        const records = response.data.records;
+
+        const specificRecord = records.find(record => record.id === 'recbdDOaHbwUgDZgO');
+
+        if (specificRecord) {
+            // If found, return the specific record
+            res.json(specificRecord);
+        } else {
+            res.status(404).json({ error: 'Record not found' });
+        }
+
+    } catch (error) {
+        console.error('Error fetching Airtable records:', error);
+        res.status(500).json({ error: 'Unable to fetch records' });
+    }
+});
+
+//
 
 
 // Start the server
