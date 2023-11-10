@@ -11,9 +11,24 @@ const port = 3000;
 const AIRTABLE_API_KEY = 'patuzRRxeWLfrvmpv.410ced9c8d8678a66f37f90a2a29bbe35cefdcadd460535ae43c9e297b7b2fe1';
 const AIRTABLE_BASE_ID = 'appBwIpTiua9aUx8h';
 const AIRTABLE_TABLE_NAME = 'Leads tracker';
-//////////////////
+//////////////////functions
 
+function convertUnixTimestampToDate(unixTimestamp) {
+    // Create a new Date object with the Unix timestamp in milliseconds
+    const dateObject = new Date(unixTimestamp * 1000);
 
+    // Extract the components (month, day, year) from the date object
+    const month = dateObject.getMonth() + 1; // Months are zero-based, so add 1
+    const day = dateObject.getDate();
+    const year = dateObject.getFullYear();
+
+    // Format the date as month/date/year
+    const formattedDate = `${month}/${day}/${year}`;
+
+    return formattedDate;
+}
+
+////
 
 
 // Enable CORS for all routes
@@ -23,7 +38,7 @@ app.use(cors());
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
 const endpointSecret = "whsec_wYPIGf3wJiJXm8B1H4UzALaQ35jTbIC9";
 const stripe = require('stripe')(`sk_test_51M5vv4CLTcmkmHRYZkWtQyNXEjCP43tttOJZXjfQz5PoCOpXZK6cuZOtKR91YWnidNeWZasoQVI9DUxdmkg5nliB00Nh97yLKB`);
-app.post('/webhook', express.raw({ type: 'application/json' }), (request, response) => {
+app.post('/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
     const sig = request.headers['stripe-signature'];
 
     let event;
@@ -57,7 +72,39 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (request, respon
         case 'customer.created':
             const customerCreated = event.data.object;
             // Then define and call a function to handle the event customer.created
-            const recordId = customerCreated.metadata.recordId;
+            //-
+            // const recordId = customerCreated.metadata.recordId;
+            //--
+
+            const recordId = 'recbdDOaHbwUgDZgO';
+            //update record
+            try {
+                const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${recordId}`;
+                const updateData = {
+                    fields: {
+                        "Customer ID (for stripe)": customerCreated.id,
+                        "Customer created date (for stripe)": convertUnixTimestampToDate(customerCreated.created)
+                    },
+                };
+
+                const response = await axios.patch(airtableURL, updateData, {
+                    headers: {
+                        Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                    },
+                });
+
+                if (response.status === 200) {
+                    res.json({
+                        message: 'Record updated successfully',
+                    });
+                } else {
+                    res.status(500).json({ error: 'Unable to update record' });
+                }
+            } catch (error) {
+                console.error('Error updating Airtable record:', error);
+                res.status(500).json({ error: 'Unable to update record' });
+            }
+            // end update record
 
             break;
         case 'customer.deleted':
@@ -221,12 +268,7 @@ app.get('/get-records', async (req, res) => {
 
         const specificRecord = records.find(record => record.id === 'recbdDOaHbwUgDZgO');
 
-        if (specificRecord) {
-            // If found, return the specific record
-            res.json(specificRecord);
-        } else {
-            res.status(404).json({ error: 'Record not found' });
-        }
+        res.json(specificRecord);
 
     } catch (error) {
         console.error('Error fetching Airtable records:', error);
