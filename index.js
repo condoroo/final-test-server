@@ -110,6 +110,54 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
         case 'customer.subscription.created':
             const customerSubscriptionCreated = event.data.object;
             // Then define and call a function to handle the event customer.subscription.created
+            const subscriptionId = customerSubscriptionCreated.id;
+            const customer = customerSubscriptionCreated.customer;
+            //get record id based on customerId
+            try {
+                const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
+                const response = await axios.get(airtableURL, {
+                    headers: {
+                        Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                    },
+                });
+
+                const records = response.data.records;
+
+                // Find the record that matches the provided "Customer ID (for stripe)" value
+                const matchingRecord = records.find(record => {
+                    const customerIdFieldValue = record.fields["Customer ID (for stripe)"];
+                    return customerIdFieldValue === customer;
+                });
+
+                if (matchingRecord) {
+
+                    try {
+                        const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${matchingRecord.id}`;
+                        const updateData = {
+                            fields: {
+                                "Subscription ID (for stripe)": subscriptionId,
+                                "Data de inicio)": convertUnixTimestampToDate(customerSubscriptionCreated.created),
+                                "Subscription created date (for stripe)": convertUnixTimestampToDate(customerSubscriptionCreated.created),
+                            },
+                        };
+
+                        await axios.patch(airtableURL, updateData, {
+                            headers: {
+                                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                            },
+                        });
+
+                    } catch (error) {
+
+                    }
+
+
+                } else {
+
+                }
+            } catch (error) {
+
+            }
 
             break;
         case 'customer.subscription.deleted':
@@ -266,6 +314,12 @@ app.get('/get-records', async (req, res) => {
         console.error('Error fetching Airtable records:', error);
         res.status(500).json({ error: 'Unable to fetch records' });
     }
+});
+
+app.get('/tes', async (req, res) => {
+    const customerId = 'cus_Oytq0OxWH6dz8Y';
+
+
 });
 
 //
