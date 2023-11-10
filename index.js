@@ -109,6 +109,9 @@ app.post('/create-subscription', async (req, res) => {
         // Step 1: Create a customer
         const customer = await stripe.customers.create({
             email: userEmail,
+            metadata: {
+                recordId: recordId,
+            }
         });
 
         // Step 2: Create a product and a price
