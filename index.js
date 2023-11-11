@@ -6,11 +6,7 @@ const { default: axios } = require('axios');
 const app = express();
 const port = 3000;
 
-//airTable api keys
-// Replace with your Airtable API key and base ID
-const AIRTABLE_API_KEY = 'patuzRRxeWLfrvmpv.410ced9c8d8678a66f37f90a2a29bbe35cefdcadd460535ae43c9e297b7b2fe1';
-const AIRTABLE_BASE_ID = 'appBwIpTiua9aUx8h';
-const AIRTABLE_TABLE_NAME = 'Leads tracker';
+
 //////////////////functions
 
 function convertUnixTimestampToDate(unixTimestamp) {
@@ -33,11 +29,20 @@ function convertUnixTimestampToDate(unixTimestamp) {
 
 // Enable CORS for all routes
 app.use(cors());
+require('dotenv').config();
 
 //webhook event handlers
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
-const endpointSecret = "whsec_wYPIGf3wJiJXm8B1H4UzALaQ35jTbIC9";
-const stripe = require('stripe')(`sk_test_51M5vv4CLTcmkmHRYZkWtQyNXEjCP43tttOJZXjfQz5PoCOpXZK6cuZOtKR91YWnidNeWZasoQVI9DUxdmkg5nliB00Nh97yLKB`);
+const endpointSecret = `${process.env.WEB_HOOK_SECRET_KEY}`;
+const stripe = require('stripe')(`${process.env.STRIPE_SK}`);
+
+//airTable api keys
+// Replace with your Airtable API key and base ID
+const AIRTABLE_API_KEY = `${process.env.AIRTABLE_API_KEY}`;
+const AIRTABLE_BASE_ID = `${process.env.AIRTABLE_BASE_ID}`;
+const AIRTABLE_TABLE_NAME = `${process.env.AIRTABLE_TABLE_NAME}`;
+
+
 app.post('/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
     const sig = request.headers['stripe-signature'];
 
@@ -112,22 +117,31 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
             // Then define and call a function to handle the event customer.subscription.created
             const subscriptionId = customerSubscriptionCreated.id;
             const customer = customerSubscriptionCreated.customer;
+            console.log(subscriptionId)
+            console.log(customer)
+
             //get record id based on customerId
             try {
-                const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
-                const response = await axios.get(airtableURL, {
+                const airtableURL2 = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
+                const response = await axios.get(airtableURL2, {
                     headers: {
                         Authorization: `Bearer ${AIRTABLE_API_KEY}`,
                     },
                 });
 
                 const records = response.data.records;
-
+                console.log({
+                    records
+                })
                 // Find the record that matches the provided "Customer ID (for stripe)" value
                 const matchingRecord = records.find(record => {
                     const customerIdFieldValue = record.fields["Customer ID (for stripe)"];
                     return customerIdFieldValue === customer;
                 });
+
+                console.log({
+                    matchingRecord
+                })
 
                 if (matchingRecord) {
 
@@ -136,19 +150,24 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                         const updateData = {
                             fields: {
                                 "Subscription ID (for stripe)": subscriptionId,
-                                "Data de inicio)": convertUnixTimestampToDate(customerSubscriptionCreated.created),
+                                "Data de inicio": convertUnixTimestampToDate(customerSubscriptionCreated.created),
                                 "Subscription created date (for stripe)": convertUnixTimestampToDate(customerSubscriptionCreated.created),
                             },
                         };
 
-                        await axios.patch(airtableURL, updateData, {
+                        console.log('Airtable URL:', airtableURL);
+                        console.log('Update Data:', updateData);
+
+                        const response = await axios.patch(airtableURL, updateData, {
                             headers: {
                                 Authorization: `Bearer ${AIRTABLE_API_KEY}`,
                             },
                         });
 
+                        console.log('Airtable API Response:', response.data);
+                        console.log('Reached the end successfully');
                     } catch (error) {
-
+                        console.error('Error updating Airtable:', error.response ? error.response.data : error.message);
                     }
 
 
