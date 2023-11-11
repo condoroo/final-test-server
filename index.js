@@ -235,7 +235,7 @@ app.post('/create-subscription', async (req, res) => {
 
     } = req.body;
     console.log(typeof (unitPrice))
-    const stripe = require('stripe')(`${secretKey}`);
+
 
     // Split the date string into month, day, and year
     const [month, day, year] = billing_cycle_anchor?.split('/');
