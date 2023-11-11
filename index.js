@@ -78,10 +78,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
             const customerCreated = event.data.object;
             // Then define and call a function to handle the event customer.created
             //-
-            // const recordId = customerCreated.metadata.recordId;
+            const recordId = customerCreated.metadata.recordId;
             //--
 
-            const recordId = 'recbdDOaHbwUgDZgO';
+            // const recordId = 'recbdDOaHbwUgDZgO';
             //update record
             try {
                 const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${recordId}`;
