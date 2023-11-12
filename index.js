@@ -152,7 +152,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                         const updateData = {
                             fields: {
                                 "Subscription ID (for stripe)": subscriptionId,
-                                "Data de inicio (for stripe)": convertUnixTimestampToDate(customerSubscriptionCreated.created),
                                 "Subscription created date (for stripe)": convertUnixTimestampToDate(customerSubscriptionCreated.created),
                             },
                         };
