@@ -132,18 +132,14 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                 });
 
                 const records = response.data.records;
-                console.log({
-                    records
-                })
+
                 // Find the record that matches the provided "Customer ID (for stripe)" value
                 const matchingRecord = records.find(record => {
                     const customerIdFieldValue = record.fields["Customer ID (for stripe)"];
                     return customerIdFieldValue === customer;
                 });
 
-                console.log({
-                    matchingRecord
-                })
+
 
                 if (matchingRecord) {
 
