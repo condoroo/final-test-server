@@ -87,8 +87,8 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                 const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${recordId}`;
                 const updateData = {
                     fields: {
-                        "Customer ID (for stripe)": customerCreated.id,
-                        "Customer created date (for stripe)": convertUnixTimestampToDate(customerCreated.created)
+                        "Customer ID (for stripe)": 'Updated data',
+                        "Customer created date (for stripe)": 'updated data',
                     },
                 };
 
@@ -97,9 +97,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                         Authorization: `Bearer ${AIRTABLE_API_KEY}`,
                     },
                 });
+                res.json(specificRecord);
 
             } catch (error) {
-
+                res.send(error);
             }
             // end update record
 
@@ -325,9 +326,35 @@ app.get('/get-records', async (req, res) => {
         });
         const records = response.data.records;
 
-        const specificRecord = records.find(record => record.id === 'recbdDOaHbwUgDZgO');
+        const specificRecord = records.find(record => record.id === 'recrigpxBo30dyrjg');
 
-        res.json(specificRecord);
+        const recordId = specificRecord.id;
+        //--
+
+        // const recordId = 'recbdDOaHbwUgDZgO';
+        //update record
+        try {
+            const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${recordId}`;
+            const updateData = {
+                fields: {
+                    "Customer ID (for stripe)": 'Updated data',
+                    "Customer created date (for stripe)": 'updated data',
+                },
+            };
+
+            await axios.patch(airtableURL, updateData, {
+                headers: {
+                    Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                },
+            });
+            res.json(specificRecord);
+
+        } catch (error) {
+            res.send(error);
+        }
+        // end update record
+
+        // res.send(specificRecord);
 
     } catch (error) {
         console.error('Error fetching Airtable records:', error);
