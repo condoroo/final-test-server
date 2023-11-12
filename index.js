@@ -87,7 +87,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                 const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${recordId}`;
                 const updateData = {
                     fields: {
-                        "Customer ID (for stripe)": customerCreated.customer,
+                        "Customer ID (for stripe)": customerCreated.id,
                         "Customer created date (for stripe)": convertUnixTimestampToDate(customerCreated.created),
                     },
                 };
