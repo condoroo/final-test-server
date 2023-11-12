@@ -119,8 +119,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
             // Then define and call a function to handle the event customer.subscription.created
             const subscriptionId = customerSubscriptionCreated.id;
             const customer = customerSubscriptionCreated.customer;
-            console.log(subscriptionId)
-            console.log(customer)
 
             //get record id based on customerId
             try {
@@ -153,19 +151,14 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                             },
                         };
 
-                        console.log('Airtable URL:', airtableURL);
-                        console.log('Update Data:', updateData);
-
-                        const response = await axios.patch(airtableURL, updateData, {
+                        await axios.patch(airtableURL, updateData, {
                             headers: {
                                 Authorization: `Bearer ${AIRTABLE_API_KEY}`,
                             },
                         });
 
-                        console.log('Airtable API Response:', response.data);
-                        console.log('Reached the end successfully');
                     } catch (error) {
-                        console.error('Error updating Airtable:', error.response ? error.response.data : error.message);
+                        console.error('Error updating subscription:', error.response ? error.response.data : error.message);
                     }
 
 
@@ -177,11 +170,11 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
             }
 
             break;
-        case 'payment_intent.succeed':
+        case 'payment_intent.succeeded':
             const paymentIntentSucceed = event.data.object;
 
             // Then define and call a function to handle the event customer.subscription.created
-
+            console.log()
             const customerId = paymentIntentSucceed.customer;
 
 
