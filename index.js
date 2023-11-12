@@ -153,6 +153,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                             fields: {
                                 "Subscription ID (for stripe)": subscriptionId,
                                 "Subscription created date (for stripe)": convertUnixTimestampToDate(customerSubscriptionCreated.created),
+                                "Default payment method (for stripe)": customerSubscriptionCreated.invoice_settings.default_payment_method,
                             },
                         };
 
