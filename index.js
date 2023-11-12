@@ -181,6 +181,77 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
             }
 
             break;
+        case 'payment_intent.succeed':
+            const paymentIntentSucceed = event.data.object;
+
+            // Then define and call a function to handle the event customer.subscription.created
+
+            const customerId = paymentIntentSucceed.customer;
+
+
+            //get record id based on customerId
+            try {
+                const airtableURL2 = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
+                const response = await axios.get(airtableURL2, {
+                    headers: {
+                        Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                    },
+                });
+
+                const records = response.data.records;
+                console.log({
+                    records
+                })
+                // Find the record that matches the provided "Customer ID (for stripe)" value
+                const matchingRecord = records.find(record => {
+                    const customerIdFieldValue = record.fields["Customer ID (for stripe)"];
+                    return customerIdFieldValue === customerId;
+                });
+
+                console.log({
+                    matchingRecord
+                })
+
+                if (matchingRecord) {
+
+                    try {
+                        const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${matchingRecord.id}`;
+                        const updateData = {
+                            fields: {
+                                "Last succesful payment date (for stripe)": convertUnixTimestampToDate(paymentIntentSucceed.created),
+                                "Last sucessful payment ID (for stipe)": paymentIntentSucceed.id,
+                                "Last sucessful payment amount (for stipe)": paymentIntentSucceed.amount,
+                                "Last sucessful payment method (for stipe)": paymentIntentSucceed.payment_method,
+                                "Last sucessful payment charges (for stipe)": paymentIntentSucceed.amount,
+
+                            },
+                        };
+
+                        console.log('Airtable URL:', airtableURL);
+                        console.log('Update Data:', updateData);
+
+                        const response = await axios.patch(airtableURL, updateData, {
+                            headers: {
+                                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                            },
+                        });
+
+                        console.log('Airtable API Response:', response.data);
+                        console.log('Reached the end successfully');
+                    } catch (error) {
+                        console.error('Error updating Airtable:', error.response ? error.response.data : error.message);
+                    }
+
+
+                } else {
+
+                }
+            } catch (error) {
+
+            }
+
+
+            break;
         case 'customer.subscription.deleted':
             const customerSubscriptionDeleted = event.data.object;
             // Then define and call a function to handle the event customer.subscription.deleted
