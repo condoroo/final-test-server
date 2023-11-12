@@ -80,15 +80,15 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
             //-
             const recordId = customerCreated.metadata.recordId;
             //--
-
+            console.log('This is recordId: ', recordId);
             // const recordId = 'recbdDOaHbwUgDZgO';
             //update record
             try {
                 const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${recordId}`;
                 const updateData = {
                     fields: {
-                        "Customer ID (for stripe)": 'Updated data',
-                        "Customer created date (for stripe)": 'updated data',
+                        "Customer ID (for stripe)": customerCreated.customer,
+                        "Customer created date (for stripe)": customerCreated.created,
                     },
                 };
 
@@ -97,10 +97,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                         Authorization: `Bearer ${AIRTABLE_API_KEY}`,
                     },
                 });
-                res.json(specificRecord);
+                // res.json(specificRecord);
 
             } catch (error) {
-                res.send(error);
+                // res.send(error);
             }
             // end update record
 
