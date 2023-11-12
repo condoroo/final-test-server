@@ -101,6 +101,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
 
             } catch (error) {
                 // res.send(error);
+                console.log(error);
             }
             // end update record
 
