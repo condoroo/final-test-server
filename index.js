@@ -10,18 +10,39 @@ const port = 3000;
 //////////////////functions
 
 function convertUnixTimestampToDate(unixTimestamp) {
-    // Create a new Date object with the Unix timestamp in milliseconds
-    const dateObject = new Date(unixTimestamp * 1000);
+    // // Create a new Date object with the Unix timestamp in milliseconds
+    // const dateObject = new Date(unixTimestamp * 1000);
 
-    // Extract the components (month, day, year) from the date object
-    const month = dateObject.getMonth() + 1; // Months are zero-based, so add 1
-    const day = dateObject.getDate();
-    const year = dateObject.getFullYear();
+    // // Extract the components (month, day, year) from the date object
+    // const month = dateObject.getMonth() + 1; // Months are zero-based, so add 1
+    // const day = dateObject.getDate();
+    // const year = dateObject.getFullYear();
 
-    // Format the date as month/date/year
-    const formattedDate = `${month}/${day}/${year}`;
+    // // Format the date as month/date/year
+    // const formattedDate = `${month}/${day}/${year}`;
 
-    return formattedDate;
+    // return formattedDate;
+
+    // Create a new Date object from the Unix timestamp
+    const date = new Date(unixTimestamp * 1000); // Multiply by 1000 to convert to milliseconds
+
+    // Get date components
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+
+    // Get time components
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    // Determine AM or PM
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12; // Convert to 12-hour format
+
+    // Create the formatted date/time string
+    const formattedDateTime = `${month}/${day}/${year}, ${hours}:${minutes} ${ampm}`;
+
+    return formattedDateTime;
 }
 
 ////
