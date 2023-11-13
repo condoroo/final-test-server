@@ -364,7 +364,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                 const existingData = matchingRecord.fields['Last successful payment receipt URL (for stipe)'] || '';
                 const newDataValue = invoicePaymentIntentSucceed.hosted_invoice_url;
                 // Append the new data to the existing data
-                const newData = `Pagamento efetuado em: ${convertUnixTimestampToDate(invoicePaymentIntentSucceed.status_transitions.paid_at)} \n ${newDataValue}\n${existingData}`;
+                const newData = `Pagamento efetuado em: ${convertUnixTimestampToDate(invoicePaymentIntentSucceed.status_transitions.paid_at)} ${newDataValue} \n ${existingData}`;
 
 
                 if (matchingRecord) {
@@ -543,7 +543,7 @@ app.get('/get-records', async (req, res) => {
         });
         const records = response.data.records;
         // console.log(records);
-        const specificRecord = records.find(record => record.id === 'rec4Yn2Uk7z0LHn49');
+        const specificRecord = records.find(record => record.id === 'recvbfR2l1O0zQxVT');
 
         // const recordId = specificRecord.id;
         //--
@@ -572,6 +572,7 @@ app.get('/get-records', async (req, res) => {
         // end update record
 
         res.send(specificRecord);
+        // res.send(records);
 
     } catch (error) {
         console.error('Error fetching Airtable records:', error);
