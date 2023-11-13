@@ -211,7 +211,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                                 "Last sucessful payment ID (for stipe)": paymentIntentSucceed.id,
                                 "Last sucessful payment amount (for stipe)": paymentIntentSucceed.amount,
                                 "Last sucessful payment method (for stipe)": paymentIntentSucceed.payment_method,
-                                "Last sucessful payment charges (for stipe)": (paymentIntentSucceed.amount).toString(),
 
                             },
                         };
