@@ -211,7 +211,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                                 "Last sucessful payment ID (for stipe)": paymentIntentSucceed.id,
                                 "Last sucessful payment amount (for stipe)": paymentIntentSucceed.amount,
                                 "Last sucessful payment method (for stipe)": paymentIntentSucceed.payment_method,
-                                "Last sucessful payment charges (for stipe)": paymentIntentSucceed.amount,
+                                "Last sucessful payment charges (for stipe)": (paymentIntentSucceed.amount).toString(),
 
                             },
                         };
@@ -386,36 +386,36 @@ app.get('/get-records', async (req, res) => {
             },
         });
         const records = response.data.records;
+        // console.log(records);
+        const specificRecord = records.find(record => record.id === 'recAiZkqpd4yCO2FE');
 
-        const specificRecord = records.find(record => record.id === 'recrigpxBo30dyrjg');
-
-        const recordId = specificRecord.id;
+        // const recordId = specificRecord.id;
         //--
 
         // const recordId = 'recbdDOaHbwUgDZgO';
         //update record
-        try {
-            const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${recordId}`;
-            const updateData = {
-                fields: {
-                    "Customer ID (for stripe)": 'Updated data',
-                    "Customer created date (for stripe)": 'updated data',
-                },
-            };
+        // try {
+        //     const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${recordId}`;
+        //     const updateData = {
+        //         fields: {
+        //             "Customer ID (for stripe)": 'Updated data',
+        //             "Customer created date (for stripe)": 'updated data',
+        //         },
+        //     };
 
-            await axios.patch(airtableURL, updateData, {
-                headers: {
-                    Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-                },
-            });
-            res.json(specificRecord);
+        //     await axios.patch(airtableURL, updateData, {
+        //         headers: {
+        //             Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+        //         },
+        //     });
+        //     res.json(specificRecord);
 
-        } catch (error) {
-            res.send(error);
-        }
+        // } catch (error) {
+        //     res.send(error);
+        // }
         // end update record
 
-        // res.send(specificRecord);
+        res.send(specificRecord);
 
     } catch (error) {
         console.error('Error fetching Airtable records:', error);
