@@ -367,7 +367,8 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                         const updateData = {
                             fields: {
                                 "Last outstanding balance (for stripe)": invoicePaymentIntentSucceed.amount_remaining / 100,
-                                "Last successful payment receipt URL (for stipe)": invoicePaymentIntentSucceed.hosted_invoice_url
+                                "Last successful payment receipt URL (for stipe)": invoicePaymentIntentSucceed.hosted_invoice_url,
+                                "Last successful payment date (for stripe)": convertUnixTimestampToDate(invoicePaymentIntentSucceed.created)
 
                             },
                         };
