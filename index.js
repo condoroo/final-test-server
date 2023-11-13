@@ -209,9 +209,9 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                             fields: {
                                 "Last succesful payment date (for stripe)": convertUnixTimestampToDate(paymentIntentSucceed.created),
                                 "Last sucessful payment ID (for stipe)": paymentIntentSucceed.id,
-                                "Last sucessful payment amount (for stipe)": paymentIntentSucceed.amount,
+                                "Last sucessful payment amount (for stipe)": paymentIntentSucceed.amount / 100,
                                 "Last sucessful payment method (for stipe)": paymentIntentSucceed.payment_method,
-                                "Last outstanding balance (for stripe)": paymentIntentSucceed.amount_due
+                                "Last outstanding balance (for stripe)": paymentIntentSucceed.amount_remaining / 100
 
                             },
                         };
@@ -277,8 +277,8 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                             fields: {
                                 "Last failed payment date (for stripe)": failedDate,
                                 "Last failed payment ID (for stipe)": customerInvoiceFailed.id,
-                                "Last failed payment amount (for stipe)": customerInvoiceFailed.amount_due,
-                                "Last outstanding balance (for stripe)": customerInvoiceFailed.amount_due
+                                "Last failed payment amount (for stipe)": customerInvoiceFailed.amount_remaining / 100,
+                                "Last outstanding balance (for stripe)": customerInvoiceFailed.amount_remaining / 100
 
                             },
                         };
@@ -343,7 +343,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                         const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${matchingRecord.id}`;
                         const updateData = {
                             fields: {
-                                "Last outstanding balance (for stripe)": invoicePaymentIntentSucceed.amount_due,
+                                "Last outstanding balance (for stripe)": invoicePaymentIntentSucceed.amount_remaining / 100,
                                 "Last sucessful payment receipt URL (for stipe)": invoicePaymentIntentSucceed.hosted_invoice_url
 
                             },
@@ -512,7 +512,7 @@ app.get('/get-records', async (req, res) => {
         });
         const records = response.data.records;
         // console.log(records);
-        const specificRecord = records.find(record => record.id === 'recAiZkqpd4yCO2FE');
+        const specificRecord = records.find(record => record.id === 'rec4Yn2Uk7z0LHn49');
 
         // const recordId = specificRecord.id;
         //--
