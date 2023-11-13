@@ -211,6 +211,74 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                                 "Last sucessful payment ID (for stipe)": paymentIntentSucceed.id,
                                 "Last sucessful payment amount (for stipe)": paymentIntentSucceed.amount,
                                 "Last sucessful payment method (for stipe)": paymentIntentSucceed.payment_method,
+                                "Last outstanding balance (for stripe)": paymentIntentSucceed.amount_due
+
+                            },
+                        };
+
+                        // console.log('Airtable URL:', airtableURL);
+                        // console.log('Update Data:', updateData);
+
+                        const response = await axios.patch(airtableURL, updateData, {
+                            headers: {
+                                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                            },
+                        });
+
+                        console.log('Airtable API Response:', response.data);
+                        console.log('Reached the end successfully');
+                    } catch (error) {
+                        console.error('Error updating Airtable:', error.response ? error.response.data : error.message);
+                    }
+
+
+                } else {
+
+                }
+            } catch (error) {
+
+            }
+
+
+            break;
+        case 'invoice.payment_failed':
+            const customerInvoiceFailed = event.data.object;
+            // Then define and call a function to handle the event customer.subscription.deleted
+            const customerID = customerInvoiceFailed.customer;
+            const failedDate = convertUnixTimestampToDate(customerInvoiceFailed.created)
+
+            try {
+                const airtableURL2 = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
+                const response = await axios.get(airtableURL2, {
+                    headers: {
+                        Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                    },
+                });
+
+                const records = response.data.records;
+                console.log({
+                    records
+                })
+                // Find the record that matches the provided "Customer ID (for stripe)" value
+                const matchingRecord = records.find(record => {
+                    const customerIdFieldValue = record.fields["Customer ID (for stripe)"];
+                    return customerIdFieldValue === customerID;
+                });
+
+                console.log({
+                    matchingRecord
+                })
+
+                if (matchingRecord) {
+
+                    try {
+                        const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${matchingRecord.id}`;
+                        const updateData = {
+                            fields: {
+                                "Last failed payment date (for stripe)": failedDate,
+                                "Last failed payment ID (for stipe)": customerInvoiceFailed.id,
+                                "Last failed payment amount (for stipe)": customerInvoiceFailed.amount_due,
+                                "Last outstanding balance (for stripe)": customerInvoiceFailed.amount_due
 
                             },
                         };
@@ -240,13 +308,71 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
 
 
             break;
-        case 'customer.subscription.deleted':
-            const customerSubscriptionDeleted = event.data.object;
-            // Then define and call a function to handle the event customer.subscription.deleted
-            break;
-        case 'customer.subscription.paused':
-            const customerSubscriptionPaused = event.data.object;
+        case 'invoice.payment_succeeded':
+            const invoicePaymentIntentSucceed = event.data.object;
             // Then define and call a function to handle the event customer.subscription.paused
+            const customerid = invoicePaymentIntentSucceed.customer;
+            const successDate = convertUnixTimestampToDate(invoicePaymentIntentSucceed.created);
+
+
+            try {
+                const airtableURL2 = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
+                const response = await axios.get(airtableURL2, {
+                    headers: {
+                        Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                    },
+                });
+
+                const records = response.data.records;
+                console.log({
+                    records
+                })
+                // Find the record that matches the provided "Customer ID (for stripe)" value
+                const matchingRecord = records.find(record => {
+                    const customerIdFieldValue = record.fields["Customer ID (for stripe)"];
+                    return customerIdFieldValue === customerid;
+                });
+
+                console.log({
+                    matchingRecord
+                })
+
+                if (matchingRecord) {
+
+                    try {
+                        const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${matchingRecord.id}`;
+                        const updateData = {
+                            fields: {
+                                "Last outstanding balance (for stripe)": invoicePaymentIntentSucceed.amount_due,
+                                "Last sucessful payment receipt URL (for stipe)": invoicePaymentIntentSucceed.hosted_invoice_url
+
+                            },
+                        };
+
+                        console.log('Airtable URL:', airtableURL);
+                        console.log('Update Data:', updateData);
+
+                        const response = await axios.patch(airtableURL, updateData, {
+                            headers: {
+                                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                            },
+                        });
+
+                        console.log('Airtable API Response:', response.data);
+                        console.log('Reached the end successfully');
+                    } catch (error) {
+                        console.error('Error updating Airtable:', error.response ? error.response.data : error.message);
+                    }
+
+
+                } else {
+
+                }
+            } catch (error) {
+
+            }
+
+
             break;
         case 'customer.subscription.pending_update_applied':
             const customerSubscriptionPendingUpdateApplied = event.data.object;
