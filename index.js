@@ -32,7 +32,7 @@ function convertUnixTimestampToDate(unixTimestamp) {
     const year = date.getFullYear();
 
     // Get time components
-    const hours = String(date.getHours()).padStart(2, '0');
+    let hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
 
     // Determine AM or PM
@@ -44,6 +44,8 @@ function convertUnixTimestampToDate(unixTimestamp) {
 
     return formattedDateTime;
 }
+
+
 
 ////
 
