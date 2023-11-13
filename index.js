@@ -230,10 +230,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                         const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${matchingRecord.id}`;
                         const updateData = {
                             fields: {
-                                "Last succesful payment date (for stripe)": convertUnixTimestampToDate(paymentIntentSucceed.created),
-                                "Last sucessful payment ID (for stipe)": paymentIntentSucceed.id,
-                                "Last sucessful payment amount (for stipe)": paymentIntentSucceed.amount / 100,
-                                "Last sucessful payment method (for stipe)": paymentIntentSucceed.payment_method,
+                                "Last successful payment date (for stripe)": convertUnixTimestampToDate(paymentIntentSucceed.created),
+                                "Last successful payment ID (for stipe)": paymentIntentSucceed.id,
+                                "Last successful payment amount (for stipe)": paymentIntentSucceed.amount / 100,
+                                "Last successful payment method (for stipe)": paymentIntentSucceed.payment_method,
                                 "Last outstanding balance (for stripe)": paymentIntentSucceed.amount_remaining / 100
 
                             },
@@ -367,7 +367,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                         const updateData = {
                             fields: {
                                 "Last outstanding balance (for stripe)": invoicePaymentIntentSucceed.amount_remaining / 100,
-                                "Last sucessful payment receipt URL (for stipe)": invoicePaymentIntentSucceed.hosted_invoice_url
+                                "Last successful payment receipt URL (for stipe)": invoicePaymentIntentSucceed.hosted_invoice_url
 
                             },
                         };
