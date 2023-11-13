@@ -364,7 +364,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                 const existingData = matchingRecord.fields['Last successful payment receipt URL (for stipe)'] || '';
                 const newDataValue = invoicePaymentIntentSucceed.hosted_invoice_url;
                 // Append the new data to the existing data
-                const newData = `Pagamento efetuado em: ${invoicePaymentIntentSucceed.status_transitions.paid_at} ${newDataValue} ${existingData}`;
+                const newData = `Pagamento efetuado em: ${invoicePaymentIntentSucceed.status_transitions.paid_at}\n${newDataValue}\n${existingData}`;
 
 
                 if (matchingRecord) {
