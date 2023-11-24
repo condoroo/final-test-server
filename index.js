@@ -450,6 +450,7 @@ app.post('/create-subscription', async (req, res) => {
         imageUrl,
         recordId,
         billing_cycle_anchor,
+        trial_end,
 
     } = req.body;
     console.log(typeof (unitPrice))
@@ -457,13 +458,13 @@ app.post('/create-subscription', async (req, res) => {
 
 
     // Split the date string into month, day, and year
-    // const [month, day, year] = billing_cycle_anchor?.split('/');
+    const [month, day, year] = billing_cycle_anchor?.split('/');
 
     // Create a new Date object with the specified year, month (zero-based), and day
-    // const dateObject = new Date(year, month - 1, day);
+    const dateObject = new Date(year, month - 1, day);
 
     // Get the UNIX timestamp in seconds
-    // const unixTimestamp = Math.floor(dateObject.getTime() / 1000);
+    const unixTimestamp = Math.floor(dateObject.getTime() / 1000);
 
 
     try {
@@ -517,7 +518,8 @@ app.post('/create-subscription', async (req, res) => {
             },
             mode: 'subscription',
             subscription_data: {
-                billing_cycle_anchor: billing_cycle_anchor,
+                billing_cycle_anchor: unixTimestamp,
+                trial_end: trial_end,
             },
             success_url: `${reDirectUrl}`,
             cancel_url: `${reDirectUrl}`,
