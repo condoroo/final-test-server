@@ -453,16 +453,17 @@ app.post('/create-subscription', async (req, res) => {
 
     } = req.body;
     console.log(typeof (unitPrice))
+    console.log('this is billing cycle anchor', billing_cycle_anchor);
 
 
     // Split the date string into month, day, and year
-    const [month, day, year] = billing_cycle_anchor?.split('/');
+    // const [month, day, year] = billing_cycle_anchor?.split('/');
 
     // Create a new Date object with the specified year, month (zero-based), and day
-    const dateObject = new Date(year, month - 1, day);
+    // const dateObject = new Date(year, month - 1, day);
 
     // Get the UNIX timestamp in seconds
-    const unixTimestamp = Math.floor(dateObject.getTime() / 1000);
+    // const unixTimestamp = Math.floor(dateObject.getTime() / 1000);
 
 
     try {
