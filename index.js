@@ -516,7 +516,7 @@ app.post('/create-subscription', async (req, res) => {
             },
             mode: 'subscription',
             subscription_data: {
-                billing_cycle_anchor: unixTimestamp,
+                billing_cycle_anchor: billing_cycle_anchor,
             },
             success_url: `${reDirectUrl}`,
             cancel_url: `${reDirectUrl}`,
