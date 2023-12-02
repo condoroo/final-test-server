@@ -670,7 +670,7 @@ app.post('/createCustomer', async (req, res) => {
                 throw new Error('Error creating customer. Server returned code 100.');
             }
 
-            return response;
+            return response.data;
         } catch (error) {
             console.error('Error creating customer:', error.response?.data || error.message);
             throw error;
@@ -709,7 +709,7 @@ app.post('/createCustomer', async (req, res) => {
         // Make the request to create a customer
         const customerCreationData = await createCustomer(accessToken, customerData);
 
-        res.json({ customerCreationData });
+        res.json(customerCreationData);
     } catch (error) {
         console.error(error);
         res.status(500).json({ code: 100, message: 'Internal Server Error' });
