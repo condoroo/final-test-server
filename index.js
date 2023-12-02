@@ -592,20 +592,7 @@ app.get('/tes', async (req, res) => {
 //
 //Create customer invoice
 /*************************************************************
- *                  Global Variables                        *
- *************************************************************/
-// Global Variables
-const backendUrl = 'https://sis100.phcgo.net/ec984463/';
-const appId = 'C06F947261';
-const userCode = 'suporte@condoroo.ai';
-const password = 'Shakil1234Test?';
-const company = "";
-const tokenLifeTime = '1';
 
-/*************************************************************
- *                      Constants                           *
- *************************************************************/
-const API_URL = 'https://interface.phcsoftware.com/v3';
 const generateAccessTokenEndpoint = '/generateAccessToken';
 const createCustomerEndpoint = '/createCustomer';
 
@@ -613,7 +600,78 @@ const createCustomerEndpoint = '/createCustomer';
  *          Route to handle creating customers               *
  *************************************************************/
 app.post('/createCustomer', async (req, res) => {
-    const { name, email, tax_number, observations } = req.body;
+
+    const { name, email, tax_number, observations,
+        backendUrl,
+        appId,
+        userCode,
+        password,
+        company,
+        tokenLifeTime,
+        API_URL,
+    } = req.body;
+
+    /////////functions
+    /*************************************************************
+ *          Function to request access token                 *
+ *************************************************************/
+    async function requestAccessToken() {
+        const url = API_URL + generateAccessTokenEndpoint;
+
+        const credentials = {
+            backendUrl,
+            appId,
+            userCode,
+            password,
+            company,
+            tokenLifeTime,
+        };
+
+        try {
+            console.log('Requesting access token with credentials:', credentials);
+            const response = await axios.post(url, { credentials });
+            console.log('Access token response (headers):', response.headers);
+            console.log('Access token response (status):', response.status);
+            console.log('Access token response (data):', response.data);
+
+            if (response.data.code === 100) {
+                console.error('Error in login:', response.data.message);
+                throw new Error('Error in login. Please verify your credentials.');
+            }
+            return response.data.token;
+        } catch (error) {
+            console.error('Error in access token request:', error.response?.data || error.message);
+            throw error;
+        }
+    }
+
+
+
+    /*************************************************************
+     *          Function to create a customer                    *
+     *************************************************************/
+    async function createCustomer(token, customerData) {
+        const url = API_URL + createCustomerEndpoint;
+
+        try {
+            const response = await axios.post(url, customerData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+            });
+
+            if (response.data.code === 100) {
+                throw new Error('Error creating customer');
+            }
+
+            return response.data;
+        } catch (error) {
+            console.error('Error creating customer:', error.response?.data || error.message);
+            throw error;
+        }
+    }
+    //////////
     try {
         // #1 - First, get an access token
         const accessToken = await requestAccessToken();
@@ -652,65 +710,7 @@ app.post('/createCustomer', async (req, res) => {
     }
 });
 
-/*************************************************************
- *          Function to request access token                 *
- *************************************************************/
-async function requestAccessToken() {
-    const url = API_URL + generateAccessTokenEndpoint;
 
-    const credentials = {
-        backendUrl,
-        appId,
-        userCode,
-        password,
-        company,
-        tokenLifeTime,
-    };
-
-    try {
-        console.log('Requesting access token with credentials:', credentials);
-        const response = await axios.post(url, { credentials });
-        console.log('Access token response (headers):', response.headers);
-        console.log('Access token response (status):', response.status);
-        console.log('Access token response (data):', response.data);
-
-        if (response.data.code === 100) {
-            console.error('Error in login:', response.data.message);
-            throw new Error('Error in login. Please verify your credentials.');
-        }
-        return response.data.token;
-    } catch (error) {
-        console.error('Error in access token request:', error.response?.data || error.message);
-        throw error;
-    }
-}
-
-
-
-/*************************************************************
- *          Function to create a customer                    *
- *************************************************************/
-async function createCustomer(token, customerData) {
-    const url = API_URL + createCustomerEndpoint;
-
-    try {
-        const response = await axios.post(url, customerData, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: token,
-            },
-        });
-
-        if (response.data.code === 100) {
-            throw new Error('Error creating customer');
-        }
-
-        return response.data;
-    } catch (error) {
-        console.error('Error creating customer:', error.response?.data || error.message);
-        throw error;
-    }
-}
 
 
 //
