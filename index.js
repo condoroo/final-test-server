@@ -590,6 +590,268 @@ app.get('/tes', async (req, res) => {
 });
 
 //
+//Create customer invoice
+/*************************************************************
+ *                  Global Variables                        *
+ *************************************************************/
+// Global Variables
+const backendUrl = 'https://sis100.phcgo.net/ec984463/';
+const appId = 'C06F947261';
+const userCode = 'suporte@condoroo.ai';
+const password = 'Shakil1234Test?';
+const company = "";
+const tokenLifeTime = '1';
+
+/*************************************************************
+ *                      Constants                           *
+ *************************************************************/
+const API_URL = 'https://interface.phcsoftware.com/v3';
+const generateAccessTokenEndpoint = '/generateAccessToken';
+const createCustomerEndpoint = '/createCustomer';
+
+/*************************************************************
+ *          Route to handle creating customers               *
+ *************************************************************/
+app.post('/createCustomer', async (req, res) => {
+    const { name, email, tax_number, observations } = req.body;
+    try {
+        // #1 - First, get an access token
+        const accessToken = await requestAccessToken();
+        console.log(accessToken);
+        if (!accessToken) {
+            throw new Error('Error generating access token');
+        }
+
+        console.log('Access Token Generated Successfully!');
+
+        // #2 - Basic data to create the necessary customer
+        const customerData = {
+            customer: {
+                name: name,
+                address: '',
+                postalCode: '',
+                city: '',
+                country: 'Pt',
+                email: email,
+                taxNumber: tax_number,
+                phone: '',
+                mobilePhone: '',
+                iban: '',
+                bic: '',
+                observations: observations,
+            },
+        };
+
+        // Make the request to create a customer
+        const customerCreationData = await createCustomer(accessToken, customerData);
+
+        res.json(customerCreationData);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ code: 100, message: 'Internal Server Error' });
+    }
+});
+
+/*************************************************************
+ *          Function to request access token                 *
+ *************************************************************/
+async function requestAccessToken() {
+    const url = API_URL + generateAccessTokenEndpoint;
+
+    const credentials = {
+        backendUrl,
+        appId,
+        userCode,
+        password,
+        company,
+        tokenLifeTime,
+    };
+
+    try {
+        console.log('Requesting access token with credentials:', credentials);
+        const response = await axios.post(url, { credentials });
+        console.log('Access token response (headers):', response.headers);
+        console.log('Access token response (status):', response.status);
+        console.log('Access token response (data):', response.data);
+
+        if (response.data.code === 100) {
+            console.error('Error in login:', response.data.message);
+            throw new Error('Error in login. Please verify your credentials.');
+        }
+        return response.data.token;
+    } catch (error) {
+        console.error('Error in access token request:', error.response?.data || error.message);
+        throw error;
+    }
+}
+
+
+
+/*************************************************************
+ *          Function to create a customer                    *
+ *************************************************************/
+async function createCustomer(token, customerData) {
+    const url = API_URL + createCustomerEndpoint;
+
+    try {
+        const response = await axios.post(url, customerData, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: token,
+            },
+        });
+
+        if (response.data.code === 100) {
+            throw new Error('Error creating customer');
+        }
+
+        return response.data;
+    } catch (error) {
+        console.error('Error creating customer:', error.response?.data || error.message);
+        throw error;
+    }
+}
+
+
+//
+
+/*************************************************************
+ *          Route to handle creating customers and invoices   *
+ *************************************************************/
+app.post('/createCustomerAndInvoice', async (req, res) => {
+    try {
+        // #1 - First, get an access token
+        const accessToken = await requestAccessToken();
+        console.log(accessToken);
+        if (!accessToken) {
+            throw new Error('Error generating access token');
+        }
+
+        console.log('Access Token Generated Successfully!');
+
+        // #2 - Basic data to create the necessary customer
+        const customerData = {
+            customer: {
+                name: 'John Smith',
+                address: '',
+                postalCode: '',
+                city: '',
+                country: 'Pt',
+                email: '',
+                taxNumber: '253162793',
+                phone: '884112332',
+                mobilePhone: '332445221',
+                iban: '1122333444455',
+                bic: '3331444112',
+                observations: 'This is an example',
+            },
+        };
+
+        // #3 - Make the request to create a customer and an invoice
+        const creationMessage = await createCustomerAndInvoice(accessToken, customerData);
+
+        res.json({ code: 1, message: creationMessage });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ code: 100, message: 'Internal Server Error' });
+    }
+});
+
+/*************************************************************
+ *          Function to create a customer and an invoice      *
+ *************************************************************/
+/*************************************************************
+ *          Function to create a customer and an invoice      *
+ *************************************************************/
+async function createCustomerAndInvoice(token, customerData) {
+    const urlCreateCustomer = API_URL + createCustomerEndpoint;
+    const urlCreateInvoice = API_URL + '/createDocument'; // Update this with your actual endpoint for creating invoices
+
+    try {
+        // Create Customer
+        const responseCreateCustomer = await axios.post(urlCreateCustomer, customerData, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: token,
+            },
+        });
+
+        console.log('Response Create Customer:', responseCreateCustomer.data);
+
+        if (responseCreateCustomer.data.code === 100) {
+            throw new Error('Error creating customer');
+        }
+
+        // Extract customer number or any other necessary data
+        const customerNumber = extractCustomerNumber(responseCreateCustomer.data.message);
+
+        if (!customerNumber) {
+            throw new Error('Customer number not found in the response');
+        }
+
+        // Create Invoice
+        const invoiceData = {
+            customer: {
+                number: customerNumber,
+                // ... other customer details if needed
+            },
+            requestOptions: {
+                option: 1,
+                requestedFields: [],
+            },
+            document: {
+                docType: 1,
+                invoicingAddress1: 'Invoice Address 1',
+                invoicingPostalCode: '2010-152',
+                invoicingLocality: 'Invoice Locality',
+                documentObservations: 'This is an observation',
+            },
+            products: [
+                {
+                    reference: 'A001',
+                    designation: 'Adufe',
+                    unitCode: 'M',
+                    unitPrice: 525.00,
+                    quantity: 1,
+                    taxIncluded: true,
+                    taxPercentage: 23,
+                    taxRegion: 'PT',
+                },
+                // Add other products as needed
+            ],
+        };
+
+        // Log the invoice data for debugging
+        console.log('Invoice Data:', invoiceData);
+
+        const responseCreateInvoice = await axios.post(urlCreateInvoice, invoiceData, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: token,
+            },
+        });
+
+        console.log('Response Create Invoice:', responseCreateInvoice.data);
+
+        if (responseCreateInvoice.data.code === 100) {
+            throw new Error('Error creating invoice');
+        }
+
+        return 'Customer and Invoice created successfully';
+    } catch (error) {
+        console.error('Error creating customer and invoice:', error.response?.data || error.message);
+        throw error;
+    }
+}
+
+// Function to extract customer number from the message
+function extractCustomerNumber(message) {
+    const match = message.match(/Customer no : (\d+)/);
+    return match ? match[1] : null;
+}
+
+
+
 
 
 // Start the server
