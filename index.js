@@ -670,7 +670,7 @@ app.post('/createCustomer', async (req, res) => {
                 throw new Error('Error creating customer. Server returned code 100.');
             }
 
-            return response.data;
+            return response;
         } catch (error) {
             console.error('Error creating customer:', error.response?.data || error.message);
             throw error;
