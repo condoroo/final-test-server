@@ -588,8 +588,6 @@ app.get('/tes', async (req, res) => {
 
 
 });
-
-
 const createCustomerEndpoint = '/createCustomer';
 //
 //Create customer invoice
@@ -656,6 +654,9 @@ app.post('/createCustomer', async (req, res) => {
         const url = API_URL + createCustomerEndpoint;
 
         try {
+            console.log('Creating customer with token:', token);
+            console.log('Customer data:', customerData);
+
             const response = await axios.post(url, customerData, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -663,8 +664,10 @@ app.post('/createCustomer', async (req, res) => {
                 },
             });
 
+            console.log('Create customer response:', response.data);
+
             if (response.data.code === 100) {
-                throw new Error('Error creating customer');
+                throw new Error('Error creating customer. Server returned code 100.');
             }
 
             return response.data;
@@ -673,6 +676,7 @@ app.post('/createCustomer', async (req, res) => {
             throw error;
         }
     }
+
     //////////
     try {
         // #1 - First, get an access token
