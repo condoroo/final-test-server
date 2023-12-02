@@ -589,18 +589,20 @@ app.get('/tes', async (req, res) => {
 
 });
 
+
+const createCustomerEndpoint = '/createCustomer';
 //
 //Create customer invoice
 /*************************************************************
 
-const generateAccessTokenEndpoint = '/generateAccessToken';
-const createCustomerEndpoint = '/createCustomer';
+
+
 
 /*************************************************************
  *          Route to handle creating customers               *
  *************************************************************/
 app.post('/createCustomer', async (req, res) => {
-
+    const generateAccessTokenEndpoint = '/generateAccessToken';
     const { name, email, tax_number, observations,
         backendUrl,
         appId,
