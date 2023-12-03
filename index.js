@@ -807,7 +807,7 @@ app.post('/createInvoice', async (req, res) => {
             customer: {
                 number: number,
                 name,
-                taxNumber: tax_number,
+                taxNumber: `${tax_number}`,
             },
             requestOptions: {
                 option: 1,
