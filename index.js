@@ -6,7 +6,6 @@ const { default: axios } = require('axios');
 const app = express();
 const port = 3000;
 
-
 //////////////////functions
 
 function convertUnixTimestampToDate(unixTimestamp) {
@@ -736,7 +735,8 @@ app.post('/createInvoice', async (req, res) => {
         tokenLifeTime,
         API_URL,
         designation,
-        unitPrice
+        unitPrice,
+        number
     } = req.body;
 
     /////////functions
@@ -805,7 +805,7 @@ app.post('/createInvoice', async (req, res) => {
         // #2 - Create a document
         const documentData = {
             customer: {
-                number: 1,
+                number: number,
                 name,
                 taxNumber: tax_number,
             },
@@ -841,6 +841,71 @@ app.post('/createInvoice', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ code: 100, message: 'Internal Server Error' });
+    }
+});
+// **************************************************************
+
+
+const fs = require('fs');
+const { google } = require('googleapis');
+const { JWT } = require('google-auth-library');
+const { Readable } = require('stream');
+
+const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
+const TOKEN_PATH = 'token.json'; // Replace with your token file path
+
+const authenticate = async () => {
+    const keys = require('./condoroo-83a2d733ac6e.json'); // Replace with the path to your credentials file
+
+    const auth = new JWT({
+        email: keys.client_email,
+        key: keys.private_key,
+        scopes: SCOPES,
+    });
+
+    await auth.authorize();
+    return auth;
+};
+
+app.post('/add-pdf-to-drive', async (req, res) => {
+    let pdfUrl; // Declare pdfUrl outside the try-catch block
+    try {
+
+        const folderId = '1_Vrfl9gciStXjNriF4NELYSWjzYdHl1L';
+
+        pdfUrl = 'https://sis100.phcgo.net/ec984463//phcws/cfile.aspx?fileName=Fatura%20-%2010%20-%2003.12.2023%20-%20Consumidor%20Final%20-%20253162793.pdf'; // Replace with the actual URL
+        // ... (other code)
+
+        // Download PDF from URL
+        const { data } = await axios.get(pdfUrl, { responseType: 'arraybuffer' });
+        console.log(data);
+        // Authenticate using the JWT client
+        const auth = await authenticate();
+
+        const drive = google.drive({ version: 'v3', auth });
+
+        // Upload PDF to Google Drive
+        const fileMetadata = {
+            name: `invoice_id_${Math.random(8)}.pdf`, // Replace with your desired file name
+            parents: [folderId],
+        };
+
+        // Convert the buffer to a readable stream
+        const media = {
+            mimeType: 'application/pdf',
+            body: Readable.from([Buffer.from(data, 'binary')]),
+        };
+
+        const uploadedFile = await drive.files.create({
+            resource: fileMetadata,
+            media,
+            fields: 'id',
+        });
+
+        res.json({ fileId: uploadedFile.data.id });
+    } catch (error) {
+        console.error('Error adding PDF to Google Drive:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
