@@ -906,20 +906,20 @@ app.post('/add-pdf-to-drive', async (req, res) => {
 
         // Fetch record from Airtable
         const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}/${recordId}`;
-        const airtableResponse = await axios.get(airtableURL, {
+        const airtableResponse2 = await axios.get(airtableURL, {
             headers: {
                 Authorization: `Bearer ${AIRTABLE_API_KEY}`,
             },
         });
 
-        const matchingRecord = airtableResponse.data;
+        const matchingRecord = airtableResponse2.data;
 
         // Check if a matching record was found
         if (!matchingRecord || !matchingRecord.fields) {
             console.log('No matching record found.');
             return res.status(404).json({ error: 'Matching record not found' });
         }
-
+        console.log('this is matching record', matchingRecord);
         // Fetch existing data from the field you want to update
         const existingData = matchingRecord.fields['Last invoice URL (for PHC GO)'] || '';
 
@@ -935,11 +935,13 @@ app.post('/add-pdf-to-drive', async (req, res) => {
             },
         };
 
-        await axios.patch(airtableURL, updateData, {
+        const airtableResponse = await axios.patch(airtableURL, updateData, {
             headers: {
                 Authorization: `Bearer ${AIRTABLE_API_KEY}`,
             },
         });
+
+        console.log("Airtable Response:", airtableResponse.data);
 
         res.json({ fileId: uploadedFile.data.id });
     } catch (error) {
