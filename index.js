@@ -911,7 +911,11 @@ app.post('/add-pdf-to-drive', async (req, res) => {
 
 //create folder to gDrive
 app.post('/create-folder', async (req, res) => {
-    const { name } = req.body;
+    const { name
+        , tableName,
+        recordId
+
+    } = req.body;
     try {
         const parentFolderId = '11hEU4GxEiWQuwARM64givbX_t_rskgZZ'; // Replace with your parent folder ID
         const auth = await authenticate();
@@ -1015,6 +1019,45 @@ app.post('/create-folder', async (req, res) => {
             resource: folderMetadata9,
             fields: 'id',
         });
+        //
+        //         Gdrive main folder ID: null
+        // Gdrive faturas folder ID: null
+        // Gdrive documentos folder ID: null
+        // Gdrive contratos de servicos folder ID: null
+        // Gdrive Contas bancarias folder ID: null
+        // Gdrive assembleias folder ID: null
+        // Gdrive fracoes folder ID: null
+        // Gdrive planos folder ID: null
+        // Gdrive tarefas folder ID: null
+        //
+
+        try {
+            const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}/${recordId}`;
+            const updateData = {
+                fields: {
+                    "Gdrive main folder ID": subfolder.data.id,
+                    "Gdrive faturas folder ID": folder6.data.id,
+                    "Gdrive documentos folder ID": folder5.data.id,
+                    "Gdrive contratos de servicos folder ID": folder4.data.id,
+                    "Gdrive Contas bancarias folder ID": folder3.data.id,
+                    "Gdrive assembleias folder ID": folder2.data.id,
+                    "Gdrive fracoes folder ID": folder1.data.id,
+                    "Gdrive planos folder ID": folder7.data.id,
+                    "Gdrive tarefas folder ID": folder8.data.id,
+                },
+            };
+
+            await axios.patch(airtableURL, updateData, {
+                headers: {
+                    Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                },
+            });
+            // res.json(specificRecord);
+
+        } catch (error) {
+            // res.send(error);
+            console.log(error);
+        }
 
 
         res.json({
