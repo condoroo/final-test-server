@@ -949,10 +949,20 @@ app.post('/add-pdf-to-drive', async (req, res) => {
                 matchingRecord
             })
 
+            function formatDate(inputDate) {
+                const date = new Date(inputDate);
+
+                const day = String(date.getUTCDate()).padStart(2, '0');
+                const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+                const year = date.getUTCFullYear();
+
+                return `${day}/${month}/${year}`;
+            }
+
             // Fetch the existing data from the field you want to update
             const existingData = matchingRecord.fields['Last invoice URL (for PHC GO)'] || '';
             // Append the new data to the existing data
-            const newData = `Fatura emitida em "${lastInvoiceDate}" no valor de " ${lastInvoiceAmount}€" \n\n ${existingData}`;
+            const newData = `Fatura emitida em "${formatDate(lastInvoiceDate)}" no valor de " ${lastInvoiceAmount}€" \n\n ${existingData}`;
 
 
             if (matchingRecord) {
