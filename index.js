@@ -878,9 +878,15 @@ app.post('/add-pdf-to-drive', async (req, res) => {
     } = req.body;
 
     try {
+
+
+
+        // pdfUrl = 'https://sis100.phcgo.net/ec984463//phcws/cfile.aspx?fileName=Fatura%20-%2010%20-%2003.12.2023%20-%20Consumidor%20Final%20-%20253162793.pdf'; // Replace with the actual URL
+        // ... (other code)
+
         // Download PDF from URL
         const { data } = await axios.get(pdfUrl, { responseType: 'arraybuffer' });
-
+        console.log(data);
         // Authenticate using the JWT client
         const auth = await authenticate();
 
@@ -888,7 +894,7 @@ app.post('/add-pdf-to-drive', async (req, res) => {
 
         // Upload PDF to Google Drive
         const fileMetadata = {
-            name: `invoice_id_${Date.now()}.pdf`, // Use a unique filename
+            name: `invoice_id_${Math.random(8)}.pdf`, // Replace with your desired file name
             parents: [folderId],
         };
 
@@ -904,52 +910,73 @@ app.post('/add-pdf-to-drive', async (req, res) => {
             fields: 'id',
         });
 
-        // Fetch record from Airtable
-        const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}/${recordId}`;
-        const airtableResponse2 = await axios.get(airtableURL, {
+        /////////////////////////////////////
+
+        const airtableURL2 = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}`;
+        const response = await axios.get(airtableURL2, {
             headers: {
                 Authorization: `Bearer ${AIRTABLE_API_KEY}`,
             },
         });
 
-        const matchingRecord = airtableResponse2.data;
+        const records = response.data.records;
+        console.log({
+            records
+        })
+        // Find the record that matches the provided "Customer ID (for stripe)" value
+        const matchingRecord = records.find(record => {
+            const customerIdFieldValue = record.fields["Record_ID"];
+            return customerIdFieldValue === recordId;
+        });
 
-        // Check if a matching record was found
-        if (!matchingRecord || !matchingRecord.fields) {
-            console.log('No matching record found.');
-            return res.status(404).json({ error: 'Matching record not found' });
-        }
-        console.log('this is matching record', matchingRecord);
-        // Fetch existing data from the field you want to update
+        console.log({
+            matchingRecord
+        })
+
+        // Fetch the existing data from the field you want to update
         const existingData = matchingRecord.fields['Last invoice URL (for PHC GO)'] || '';
 
         // Append the new data to the existing data
-        const newData = `Fatura emitida em "${lastInvoiceDate}" no valor de "${lastInvoiceAmount}€" \n\n${existingData}`;
+        // const newData = `Fatura emitida em "${lastInvoiceDate}" no valor de " ${lastInvoiceAmount}€" \n\n ${existingData}`;
 
-        // Update record in Airtable
-        const updateData = {
-            fields: {
-                "Last invoice date(for PHC GO)": lastInvoiceDate,
-                "Last invoice amount(for PHC GO)": lastInvoiceAmount,
-                "Last invoice URL(for PHC GO)": newData,
-            },
-        };
+        //
+        //         Last invoice date(for PHC GO)
 
-        const airtableResponse = await axios.patch(airtableURL, updateData, {
-            headers: {
-                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-            },
-        });
+        // Last invoice amount(for PHC GO)
 
-        console.log("Airtable Response:", airtableResponse.data);
+        // Last invoice URL(for PHC GO)
+
+        //             "Fatura emitida em " & date & " no valor de " & amount & "€"
+        //
+
+        // try {
+        //     const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}/${recordId}`;
+        //     const updateData = {
+        //         fields: {
+        //             "Last invoice date(for PHC GO)": lastInvoiceDate,
+        //             "Last invoice amount(for PHC GO)": lastInvoiceAmount,
+        //             "Last invoice URL(for PHC GO)": 'data',
+        //         },
+        //     };
+
+        //     await axios.patch(airtableURL, updateData, {
+        //         headers: {
+        //             Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+        //         },
+        //     });
+        //     // res.json(specificRecord);
+
+        // } catch (error) {
+        //     // res.send(error);
+        //     console.log(error);
+        // }
 
         res.json({ fileId: uploadedFile.data.id });
     } catch (error) {
-        console.error('Error during the main process:', error);
+        console.error('Error adding PDF to Google Drive:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 
 //create folder to gDrive
 app.post('/create-folder', async (req, res) => {
