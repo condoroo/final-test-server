@@ -738,7 +738,7 @@ app.post('/createInvoice', async (req, res) => {
         unitPrice,
         number
     } = req.body;
-
+    console.log('this is tax number', tax_number);
     /////////functions
     /*************************************************************
  *          Function to request access token                 *
