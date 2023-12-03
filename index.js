@@ -937,7 +937,7 @@ app.post('/add-pdf-to-drive', async (req, res) => {
         const existingData = matchingRecord.fields['Last invoice URL (for PHC GO)'] || '';
 
         // Append the new data to the existing data
-        const newData = `Fatura emitida em "${lastInvoiceDate}" no valor de " ${lastInvoiceAmount}€" \n\n ${existingData}`;
+        // const newData = `Fatura emitida em "${lastInvoiceDate}" no valor de " ${lastInvoiceAmount}€" \n\n ${existingData}`;
 
         //
         //         Last invoice date(for PHC GO)
@@ -955,7 +955,7 @@ app.post('/add-pdf-to-drive', async (req, res) => {
                 fields: {
                     "Last invoice date(for PHC GO)": lastInvoiceDate,
                     "Last invoice amount(for PHC GO)": lastInvoiceAmount,
-                    "Last invoice URL(for PHC GO)": newData,
+                    "Last invoice URL(for PHC GO)": 'data',
                 },
             };
 
