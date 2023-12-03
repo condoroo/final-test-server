@@ -588,7 +588,6 @@ app.get('/tes', async (req, res) => {
 
 
 });
-const createCustomerEndpoint = '/createCustomer';
 //
 //Create customer invoice
 /*************************************************************
@@ -599,6 +598,7 @@ const createCustomerEndpoint = '/createCustomer';
 /*************************************************************
  *          Route to handle creating customers               *
  *************************************************************/
+const createCustomerEndpoint = '/createCustomer';
 app.post('/createCustomer', async (req, res) => {
     const generateAccessTokenEndpoint = '/generateAccessToken';
     const { name, email, tax_number, observations,
@@ -724,82 +724,90 @@ app.post('/createCustomer', async (req, res) => {
 /*************************************************************
  *          Route to handle creating customers and invoices   *
  *************************************************************/
-app.post('/createCustomerAndInvoice', async (req, res) => {
+app.post('/createInvoice', async (req, res) => {
+    const generateAccessTokenEndpoint = '/generateAccessToken';
+    const createDocumentEndpoint = '/createDocument';
+    const { name, email, tax_number, observations,
+        backendUrl,
+        appId,
+        userCode,
+        password,
+        company,
+        tokenLifeTime,
+        API_URL,
+        designation,
+        unitPrice
+    } = req.body;
+
+    /////////functions
+    /*************************************************************
+ *          Function to request access token                 *
+ *************************************************************/
+    async function requestAccessToken() {
+        const url = API_URL + generateAccessTokenEndpoint;
+
+        const credentials = {
+            backendUrl,
+            appId,
+            userCode,
+            password,
+            company,
+            tokenLifeTime,
+        };
+
+        try {
+            console.log('Requesting access token with credentials:', credentials);
+            const response = await axios.post(url, { credentials });
+            console.log('Access token response (headers):', response.headers);
+            console.log('Access token response (status):', response.status);
+            console.log('Access token response (data):', response.data);
+
+            if (response.data.code === 100) {
+                console.error('Error in login:', response.data.message);
+                throw new Error('Error in login. Please verify your credentials.');
+            }
+            return response.data.token;
+        } catch (error) {
+            console.error('Error in access token request:', error.response?.data || error.message);
+            throw error;
+        }
+    }
+    async function createDocument(token, documentData) {
+        const url = API_URL + createDocumentEndpoint;
+
+        try {
+            const response = await axios.post(url, documentData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: token,
+                },
+            });
+
+            console.log('Create document response:', response.data);
+
+            if (response.data.code === 100) {
+                console.error('Error creating document:', response.data.message);
+                throw new Error('Error creating document');
+            }
+
+            return response.data.message;
+        } catch (error) {
+            console.error('Error creating document:', error.response?.data || error.message);
+            throw error;
+        }
+    }
+
     try {
         // #1 - First, get an access token
         const accessToken = await requestAccessToken();
-        console.log(accessToken);
-        if (!accessToken) {
-            throw new Error('Error generating access token');
-        }
-
         console.log('Access Token Generated Successfully!');
 
-        // #2 - Basic data to create the necessary customer
-        const customerData = {
+        // #2 - Create a document
+        const documentData = {
             customer: {
-                name: 'John Smith',
-                address: '',
-                postalCode: '',
-                city: '',
-                country: 'Pt',
-                email: '',
-                taxNumber: '253162793',
-                phone: '884112332',
-                mobilePhone: '332445221',
-                iban: '1122333444455',
-                bic: '3331444112',
-                observations: 'This is an example',
-            },
-        };
-
-        // #3 - Make the request to create a customer and an invoice
-        const creationMessage = await createCustomerAndInvoice(accessToken, customerData);
-
-        res.json({ code: 1, message: creationMessage });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ code: 100, message: 'Internal Server Error' });
-    }
-});
-
-/*************************************************************
- *          Function to create a customer and an invoice      *
- *************************************************************/
-/*************************************************************
- *          Function to create a customer and an invoice      *
- *************************************************************/
-async function createCustomerAndInvoice(token, customerData) {
-    const urlCreateCustomer = API_URL + createCustomerEndpoint;
-    const urlCreateInvoice = API_URL + '/createDocument'; // Update this with your actual endpoint for creating invoices
-
-    try {
-        // Create Customer
-        const responseCreateCustomer = await axios.post(urlCreateCustomer, customerData, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: token,
-            },
-        });
-
-        console.log('Response Create Customer:', responseCreateCustomer.data);
-
-        if (responseCreateCustomer.data.code === 100) {
-            throw new Error('Error creating customer');
-        }
-
-        // Extract customer number or any other necessary data
-        const customerNumber = extractCustomerNumber(responseCreateCustomer.data.message);
-
-        if (!customerNumber) {
-            throw new Error('Customer number not found in the response');
-        }
-
-        // Create Invoice
-        const invoiceData = {
-            customer: {
-                number: customerNumber,
-                // ... other customer details if needed
+                number: 1,
+                name,
+                taxNumber: tax_number,
             },
             requestOptions: {
                 option: 1,
@@ -807,54 +815,36 @@ async function createCustomerAndInvoice(token, customerData) {
             },
             document: {
                 docType: 1,
-                invoicingAddress1: 'Invoice Address 1',
-                invoicingPostalCode: '2010-152',
-                invoicingLocality: 'Invoice Locality',
-                documentObservations: 'This is an observation',
+                invoicingAddress1: '',
+                invoicingPostalCode: '',
+                invoicingLocality: '',
+                documentObservations: '',
             },
             products: [
                 {
-                    reference: 'A001',
-                    designation: 'Adufe',
+                    reference: '',
+                    designation: designation,
                     unitCode: 'M',
-                    unitPrice: 525.00,
+                    unitPrice: unitPrice,
                     quantity: 1,
                     taxIncluded: true,
                     taxPercentage: 23,
                     taxRegion: 'PT',
-                },
-                // Add other products as needed
+                }
             ],
         };
 
-        // Log the invoice data for debugging
-        console.log('Invoice Data:', invoiceData);
+        const creationMessage = await createDocument(accessToken, documentData);
+        console.log(creationMessage);
 
-        const responseCreateInvoice = await axios.post(urlCreateInvoice, invoiceData, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: token,
-            },
-        });
-
-        console.log('Response Create Invoice:', responseCreateInvoice.data);
-
-        if (responseCreateInvoice.data.code === 100) {
-            throw new Error('Error creating invoice');
-        }
-
-        return 'Customer and Invoice created successfully';
+        res.json(creationMessage);
     } catch (error) {
-        console.error('Error creating customer and invoice:', error.response?.data || error.message);
-        throw error;
+        console.error(error);
+        res.status(500).json({ code: 100, message: 'Internal Server Error' });
     }
-}
+});
 
-// Function to extract customer number from the message
-function extractCustomerNumber(message) {
-    const match = message.match(/Customer no : (\d+)/);
-    return match ? match[1] : null;
-}
+
 
 
 
