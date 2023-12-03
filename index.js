@@ -868,12 +868,17 @@ const authenticate = async () => {
 };
 //add files to gDrive
 app.post('/add-pdf-to-drive', async (req, res) => {
-    let pdfUrl; // Declare pdfUrl outside the try-catch block
+    const {
+        folderId,
+        pdfUrl
+
+    } = req.body;
+
     try {
 
-        const folderId = '1_Vrfl9gciStXjNriF4NELYSWjzYdHl1L';
 
-        pdfUrl = 'https://sis100.phcgo.net/ec984463//phcws/cfile.aspx?fileName=Fatura%20-%2010%20-%2003.12.2023%20-%20Consumidor%20Final%20-%20253162793.pdf'; // Replace with the actual URL
+
+        // pdfUrl = 'https://sis100.phcgo.net/ec984463//phcws/cfile.aspx?fileName=Fatura%20-%2010%20-%2003.12.2023%20-%20Consumidor%20Final%20-%20253162793.pdf'; // Replace with the actual URL
         // ... (other code)
 
         // Download PDF from URL
