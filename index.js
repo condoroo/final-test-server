@@ -870,8 +870,11 @@ const authenticate = async () => {
 app.post('/add-pdf-to-drive', async (req, res) => {
     const {
         folderId,
-        pdfUrl
-
+        pdfUrl,
+        lastInvoiceDate,
+        lastInvoiceAmount,
+        recordId,
+        tableName
     } = req.body;
 
     try {
@@ -906,6 +909,67 @@ app.post('/add-pdf-to-drive', async (req, res) => {
             media,
             fields: 'id',
         });
+
+        /////////////////////////////////////
+
+        const airtableURL2 = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}`;
+        const response = await axios.get(airtableURL2, {
+            headers: {
+                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+            },
+        });
+
+        const records = response.data.records;
+        console.log({
+            records
+        })
+        // Find the record that matches the provided "Customer ID (for stripe)" value
+        const matchingRecord = records.find(record => {
+            const customerIdFieldValue = record.fields["Record_ID"];
+            return customerIdFieldValue === recordId;
+        });
+
+        console.log({
+            matchingRecord
+        })
+
+        // Fetch the existing data from the field you want to update
+        const existingData = matchingRecord.fields['Last invoice URL (for PHC GO)'] || '';
+
+        // Append the new data to the existing data
+        const newData = `Fatura emitida em "${lastInvoiceDate}" no valor de " ${lastInvoiceAmount}€" \n\n ${existingData}`;
+
+        //
+        //         Last invoice date(for PHC GO)
+
+        // Last invoice amount(for PHC GO)
+
+        // Last invoice URL(for PHC GO)
+
+        //             "Fatura emitida em " & date & " no valor de " & amount & "€"
+        //
+
+        try {
+            const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}/${recordId}`;
+            const updateData = {
+                fields: {
+                    "Last invoice date(for PHC GO)": lastInvoiceDate,
+                    "Last invoice amount(for PHC GO)": lastInvoiceAmount,
+                    "Last invoice URL(for PHC GO)": newData,
+                },
+            };
+
+            await axios.patch(airtableURL, updateData, {
+                headers: {
+                    Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                },
+            });
+            // res.json(specificRecord);
+
+        } catch (error) {
+            // res.send(error);
+            console.log(error);
+        }
 
         res.json({ fileId: uploadedFile.data.id });
     } catch (error) {
