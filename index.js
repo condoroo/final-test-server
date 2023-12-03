@@ -941,7 +941,7 @@ app.post('/add-pdf-to-drive', async (req, res) => {
             })
             // Find the record that matches the provided "Customer ID (for stripe)" value
             const matchingRecord = records.find(record => {
-                const customerIdFieldValue = record.fields["Customer ID (for stripe)"];
+                const customerIdFieldValue = record.fields["Record ID (for stripe)"];
                 return customerIdFieldValue === customerid;
             });
 
