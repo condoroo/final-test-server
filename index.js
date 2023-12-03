@@ -961,9 +961,9 @@ app.post('/add-pdf-to-drive', async (req, res) => {
                     const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}/${recordId}`;
                     const updateData = {
                         fields: {
-                            "Last invoice date(for PHC GO)": lastInvoiceDate,
-                            "Last invoice amount(for PHC GO)": lastInvoiceAmount,
-                            "Last invoice URL(for PHC GO)": newData,
+                            "Last invoice date (for PHC GO)": lastInvoiceDate,
+                            "Last invoice amount (for PHC GO)": lastInvoiceAmount,
+                            "Last invoice URL (for PHC GO)": newData,
 
                         },
                     };
