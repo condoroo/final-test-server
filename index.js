@@ -790,7 +790,7 @@ app.post('/createInvoice', async (req, res) => {
                 throw new Error('Error creating document');
             }
 
-            return response.data.message;
+            return response.data;
         } catch (error) {
             console.error('Error creating document:', error.response?.data || error.message);
             throw error;
@@ -818,7 +818,7 @@ app.post('/createInvoice', async (req, res) => {
                 invoicingAddress1: '',
                 invoicingPostalCode: '',
                 invoicingLocality: '',
-                documentObservations: '',
+                documentObservations: observations,
             },
             products: [
                 {
