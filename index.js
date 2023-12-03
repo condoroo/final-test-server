@@ -950,7 +950,7 @@ app.post('/add-pdf-to-drive', async (req, res) => {
             })
 
             // Fetch the existing data from the field you want to update
-            const existingData = matchingRecord.fields['Last invoice URL(for PHC GO)'] || '';
+            const existingData = matchingRecord.fields['Last invoice URL (for PHC GO)'] || '';
             // Append the new data to the existing data
             const newData = `Fatura emitida em "${lastInvoiceDate}" no valor de " ${lastInvoiceAmount}€" \n\n ${existingData}`;
 
