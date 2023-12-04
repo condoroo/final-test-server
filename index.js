@@ -959,10 +959,18 @@ app.post('/add-pdf-to-drive', async (req, res) => {
                 return `${day}/${month}/${year}`;
             }
 
+            function formatNumberWithTwoDecimals(number) {
+                if (typeof number !== 'number') {
+                    throw new Error('Input must be a number');
+                }
+
+                return number.toFixed(2);
+            }
+
             // Fetch the existing data from the field you want to update
             const existingData = matchingRecord.fields['Last invoice URL (for PHC GO)'] || '';
             // Append the new data to the existing data
-            const newData = `Fatura emitida em "${formatDate(lastInvoiceDate)}" no valor de " ${lastInvoiceAmount}€" \n\n ${existingData}`;
+            const newData = `Fatura emitida em "${formatDate(lastInvoiceDate)}" no valor de " ${formatNumberWithTwoDecimals(lastInvoiceAmount)}€" \n\n ${existingData}`;
 
 
             if (matchingRecord) {
