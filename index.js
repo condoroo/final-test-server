@@ -1023,37 +1023,7 @@ app.post('/add-pdf-to-drive', async (req, res) => {
 });
 
 
-function generateMonths() {
-    const monthsPerYear = 12;
-    const result = [];
 
-    // Get current date
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1; // Adding 1 because months are zero-indexed
-    const currentYear = currentDate.getFullYear();
-
-    // Start generating from the current month
-    let month = currentMonth;
-    let year = currentYear;
-
-    for (let i = 0; i < 36; i++) {
-        // Adjust year and month when necessary
-        if (month > monthsPerYear) {
-            month = 1;
-            year++;
-        }
-
-        const formattedMonth = `${String(year).slice(2)}.${(month < 10 ? '0' : '') + month} ${new Date(year, month - 1, 1).toLocaleString('default', { month: 'short' })} ${String(year).slice(2)}`;
-        result.push(formattedMonth);
-
-        month++;
-    }
-
-    return result;
-}
-
-const monthsArray = generateMonths();
-console.log(monthsArray);
 
 //create folder to gDrive
 // app.post('/create-folder', async (req, res) => {
@@ -1315,6 +1285,38 @@ app.post('/create-folder', async (req, res) => {
 
         // Create subfolders inside '6. Faturas'
         const folder6 = folderIds[5]; // Index 5 corresponds to '6. Faturas'
+
+        function generateMonths() {
+            const monthsPerYear = 12;
+            const result = [];
+
+            // Get current date
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth() + 1; // Adding 1 because months are zero-indexed
+            const currentYear = currentDate.getFullYear();
+
+            // Start generating from the current month
+            let month = currentMonth;
+            let year = currentYear;
+
+            for (let i = 0; i < 36; i++) {
+                // Adjust year and month when necessary
+                if (month > monthsPerYear) {
+                    month = 1;
+                    year++;
+                }
+
+                const formattedMonth = `${String(year).slice(2)}.${(month < 10 ? '0' : '') + month} ${new Date(year, month - 1, 1).toLocaleString('default', { month: 'short' })} ${String(year).slice(2)}`;
+                result.push(formattedMonth);
+
+                month++;
+            }
+
+            return result;
+        }
+
+        const monthsArray = generateMonths();
+        console.log(monthsArray);
 
         // Create subfolders for each month
         for (const nameOfMonths of monthsArray) {
