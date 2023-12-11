@@ -1132,6 +1132,18 @@ app.post('/create-folder', async (req, res) => {
             resource: folderMetadata9,
             fields: 'id',
         });
+
+        //9
+        const folderMetadata10 = {
+            name: '9. Finanças', // Replace with your desired subfolder name
+            mimeType: 'application/vnd.google-apps.folder',
+            parents: [subfolder.data.id],
+        };
+        const folder9 = await drive.files.create({
+            resource: folderMetadata10,
+            fields: 'id',
+        });
+
         //
         //         Gdrive main folder ID: null
         // Gdrive faturas folder ID: null
@@ -1157,6 +1169,7 @@ app.post('/create-folder', async (req, res) => {
                     "Gdrive fracoes folder ID": folder1.data.id,
                     "Gdrive planos folder ID": folder7.data.id,
                     "Gdrive tarefas folder ID": folder8.data.id,
+                    "Gdrive financas folder ID": folder9.data.id,
                 },
             };
 
@@ -1183,6 +1196,7 @@ app.post('/create-folder', async (req, res) => {
             folder6: folder6.data.id,
             folder7: folder7.data.id,
             folder8: folder8.data.id,
+            folder9: folder9.data.id,
         });
     } catch (error) {
         console.error('Error creating subfolder in Google Drive:', error);
