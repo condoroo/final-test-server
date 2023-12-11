@@ -1022,211 +1022,327 @@ app.post('/add-pdf-to-drive', async (req, res) => {
     }
 });
 
-//create folder to gDrive
-app.post('/create-folder', async (req, res) => {
-    const { name
-        , tableName,
-        recordId
 
-    } = req.body;
+function generateMonths() {
+    const monthsPerYear = 12;
+    const result = [];
+
+    // Get current date
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1; // Adding 1 because months are zero-indexed
+    const currentYear = currentDate.getFullYear();
+
+    // Start generating from the current month
+    let month = currentMonth;
+    let year = currentYear;
+
+    for (let i = 0; i < 36; i++) {
+        // Adjust year and month when necessary
+        if (month > monthsPerYear) {
+            month = 1;
+            year++;
+        }
+
+        const formattedMonth = `${String(year).slice(2)}.${(month < 10 ? '0' : '') + month} ${new Date(year, month - 1, 1).toLocaleString('default', { month: 'short' })} ${String(year).slice(2)}`;
+        result.push(formattedMonth);
+
+        month++;
+    }
+
+    return result;
+}
+
+const monthsArray = generateMonths();
+console.log(monthsArray);
+
+//create folder to gDrive
+// app.post('/create-folder', async (req, res) => {
+//     const { name
+//         , tableName,
+//         recordId
+
+//     } = req.body;
+//     try {
+//         const parentFolderId = '11hEU4GxEiWQuwARM64givbX_t_rskgZZ'; // Replace with your parent folder ID
+//         const auth = await authenticate();
+//         const drive = google.drive({ version: 'v3', auth });
+
+//         // Create a folder in Google Drive inside the specified parent folder
+//         const folderMetadata = {
+//             name: `${name}`, // Replace with your desired subfolder name
+//             mimeType: 'application/vnd.google-apps.folder',
+//             parents: [parentFolderId],
+//         };
+
+//         const subfolder = await drive.files.create({
+//             resource: folderMetadata,
+//             fields: 'id',
+//         });
+//         //1
+//         const folderMetadata2 = {
+//             name: '1. Frações', // Replace with your desired subfolder name
+//             mimeType: 'application/vnd.google-apps.folder',
+//             parents: [subfolder.data.id],
+//         };
+//         const folder1 = await drive.files.create({
+//             resource: folderMetadata2,
+//             fields: 'id',
+//         });
+
+//         //2
+//         const folderMetadata3 = {
+//             name: '2. Assembleias', // Replace with your desired subfolder name
+//             mimeType: 'application/vnd.google-apps.folder',
+//             parents: [subfolder.data.id],
+//         };
+//         const folder2 = await drive.files.create({
+//             resource: folderMetadata3,
+//             fields: 'id',
+//         });
+
+//         //3
+//         const folderMetadata4 = {
+//             name: '3. Contas bancárias', // Replace with your desired subfolder name
+//             mimeType: 'application/vnd.google-apps.folder',
+//             parents: [subfolder.data.id],
+//         };
+//         const folder3 = await drive.files.create({
+//             resource: folderMetadata4,
+//             fields: 'id',
+//         });
+//         //4
+//         const folderMetadata5 = {
+//             name: '4. Contratos de serviços', // Replace with your desired subfolder name
+//             mimeType: 'application/vnd.google-apps.folder',
+//             parents: [subfolder.data.id],
+//         };
+//         const folder4 = await drive.files.create({
+//             resource: folderMetadata5,
+//             fields: 'id',
+//         });
+//         //5
+//         const folderMetadata6 = {
+//             name: '5. Documentos', // Replace with your desired subfolder name
+//             mimeType: 'application/vnd.google-apps.folder',
+//             parents: [subfolder.data.id],
+//         };
+//         const folder5 = await drive.files.create({
+//             resource: folderMetadata6,
+//             fields: 'id',
+//         });
+//         //6
+//         const folderMetadata7 = {
+//             name: '6. Faturas', // Replace with your desired subfolder name
+//             mimeType: 'application/vnd.google-apps.folder',
+//             parents: [subfolder.data.id],
+//         };
+
+//         //Extra folder
+
+
+
+
+
+
+//         //
+
+//         const folder6 = await drive.files.create({
+//             resource: folderMetadata7,
+//             fields: 'id',
+//         });
+
+//         //folder6 subfolder
+//         for (const nameOfMonths of monthsArray) {
+//             console.log(nameOfMonths);
+
+//             const subFolders = {
+//                 name: nameOfMonths,
+//                 mimeType: 'application/vnd.google-apps.folder',
+//                 parents: [folder6.data.id],
+//             };
+
+//             await drive.files.create({
+//                 resource: subFolders,
+//                 fields: 'id',
+//             });
+
+//         }
+//         //
+
+//         //7
+//         const folderMetadata8 = {
+//             name: '7. Planos', // Replace with your desired subfolder name
+//             mimeType: 'application/vnd.google-apps.folder',
+//             parents: [subfolder.data.id],
+//         };
+
+//         const folder7 = await drive.files.create({
+//             resource: folderMetadata8,
+//             fields: 'id',
+//         });
+
+//         //8
+//         const folderMetadata9 = {
+//             name: '8. Tarefas', // Replace with your desired subfolder name
+//             mimeType: 'application/vnd.google-apps.folder',
+//             parents: [subfolder.data.id],
+//         };
+
+//         const folder8 = await drive.files.create({
+//             resource: folderMetadata9,
+//             fields: 'id',
+//         });
+
+//         //9
+//         const folderMetadata10 = {
+//             name: '9. Finanças', // Replace with your desired subfolder name
+//             mimeType: 'application/vnd.google-apps.folder',
+//             parents: [subfolder.data.id],
+//         };
+//         const folder9 = await drive.files.create({
+//             resource: folderMetadata10,
+//             fields: 'id',
+//         });
+
+//         //
+//         //         Gdrive main folder ID: null
+//         // Gdrive faturas folder ID: null
+//         // Gdrive documentos folder ID: null
+//         // Gdrive contratos de servicos folder ID: null
+//         // Gdrive Contas bancarias folder ID: null
+//         // Gdrive assembleias folder ID: null
+//         // Gdrive fracoes folder ID: null
+//         // Gdrive planos folder ID: null
+//         // Gdrive tarefas folder ID: null
+//         //
+
+//         try {
+//             const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}/${recordId}`;
+//             const updateData = {
+//                 fields: {
+//                     "Gdrive main folder ID": subfolder.data.id,
+//                     "Gdrive faturas folder ID": folder6.data.id,
+//                     "Gdrive documentos folder ID": folder5.data.id,
+//                     "Gdrive contratos de servicos folder ID": folder4.data.id,
+//                     "Gdrive Contas bancarias folder ID": folder3.data.id,
+//                     "Gdrive assembleias folder ID": folder2.data.id,
+//                     "Gdrive fracoes folder ID": folder1.data.id,
+//                     "Gdrive planos folder ID": folder7.data.id,
+//                     "Gdrive tarefas folder ID": folder8.data.id,
+//                     "Gdrive financas folder ID": folder9.data.id,
+//                 },
+//             };
+
+//             await axios.patch(airtableURL, updateData, {
+//                 headers: {
+//                     Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+//                 },
+//             });
+//             // res.json(specificRecord);
+
+//         } catch (error) {
+//             // res.send(error);
+//             console.log(error);
+//         }
+
+
+//         res.json({
+//             mainFolder: subfolder.data.id,
+//             folder1: folder1.data.id,
+//             folder2: folder2.data.id,
+//             folder3: folder3.data.id,
+//             folder4: folder4.data.id,
+//             folder5: folder5.data.id,
+//             folder6: folder6.data.id,
+//             folder7: folder7.data.id,
+//             folder8: folder8.data.id,
+//             folder9: folder9.data.id,
+
+//         });
+//     } catch (error) {
+//         console.error('Error creating subfolder in Google Drive:', error);
+//         res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
+app.post('/create-folder', async (req, res) => {
+    const { name, tableName, recordId } = req.body;
+
     try {
-        const parentFolderId = '11hEU4GxEiWQuwARM64givbX_t_rskgZZ'; // Replace with your parent folder ID
+        const parentFolderId = '11hEU4GxEiWQuwARM64givbX_t_rskgZZ';
         const auth = await authenticate();
         const drive = google.drive({ version: 'v3', auth });
 
-        // Create a folder in Google Drive inside the specified parent folder
-        const folderMetadata = {
-            name: `${name}`, // Replace with your desired subfolder name
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [parentFolderId],
+        // Helper function to create a subfolder
+        const createSubfolder = async (parentFolderId, folderName) => {
+            const folderMetadata = {
+                name: folderName,
+                mimeType: 'application/vnd.google-apps.folder',
+                parents: [parentFolderId],
+            };
+
+            const folder = await drive.files.create({
+                resource: folderMetadata,
+                fields: 'id',
+            });
+
+            return folder.data.id;
         };
 
-        const subfolder = await drive.files.create({
-            resource: folderMetadata,
-            fields: 'id',
-        });
-        //1
-        const folderMetadata2 = {
-            name: '1. Frações', // Replace with your desired subfolder name
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [subfolder.data.id],
-        };
-        const folder1 = await drive.files.create({
-            resource: folderMetadata2,
-            fields: 'id',
-        });
+        // Create the main folder
+        const mainFolderId = await createSubfolder(parentFolderId, name);
 
-        //2
-        const folderMetadata3 = {
-            name: '2. Assembleias', // Replace with your desired subfolder name
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [subfolder.data.id],
-        };
-        const folder2 = await drive.files.create({
-            resource: folderMetadata3,
-            fields: 'id',
-        });
+        // Define subfolder names
+        const subfolderNames = [
+            '1. Frações',
+            '2. Assembleias',
+            '3. Contas bancárias',
+            '4. Contratos de serviços',
+            '5. Documentos',
+            '6. Faturas',
+            '7. Planos',
+            '8. Tarefas',
+            '9. Finanças',
+        ];
 
-        //3
-        const folderMetadata4 = {
-            name: '3. Contas bancárias', // Replace with your desired subfolder name
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [subfolder.data.id],
-        };
-        const folder3 = await drive.files.create({
-            resource: folderMetadata4,
-            fields: 'id',
-        });
-        //4
-        const folderMetadata5 = {
-            name: '4. Contratos de serviços', // Replace with your desired subfolder name
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [subfolder.data.id],
-        };
-        const folder4 = await drive.files.create({
-            resource: folderMetadata5,
-            fields: 'id',
-        });
-        //5
-        const folderMetadata6 = {
-            name: '5. Documentos', // Replace with your desired subfolder name
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [subfolder.data.id],
-        };
-        const folder5 = await drive.files.create({
-            resource: folderMetadata6,
-            fields: 'id',
-        });
-        //6
-        const folderMetadata7 = {
-            name: '6. Faturas', // Replace with your desired subfolder name
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [subfolder.data.id],
-        };
+        // Create an array to store the folder IDs
+        const folderIds = [];
 
-        //Extra folder
-        function generateMonths() {
-            const monthsPerYear = 12;
-            const result = [];
-
-            // Get current date
-            const currentDate = new Date();
-            const currentMonth = currentDate.getMonth() + 1; // Adding 1 because months are zero-indexed
-            const currentYear = currentDate.getFullYear();
-
-            // Start generating from the current month
-            let month = currentMonth;
-            let year = currentYear;
-
-            for (let i = 0; i < 36; i++) {
-                // Adjust year and month when necessary
-                if (month > monthsPerYear) {
-                    month = 1;
-                    year++;
-                }
-
-                const formattedMonth = `${String(year).slice(2)}.${(month < 10 ? '0' : '') + month} ${new Date(year, month - 1, 1).toLocaleString('default', { month: 'short' })} ${String(year).slice(2)}`;
-                result.push(formattedMonth);
-
-                month++;
-            }
-
-            return result;
+        // Create subfolders
+        for (const subfolderName of subfolderNames) {
+            const folderId = await createSubfolder(mainFolderId, subfolderName);
+            folderIds.push(folderId);
         }
 
-        const monthsArray = generateMonths();
-        console.log(monthsArray);
+        // Create subfolders inside '6. Faturas'
+        const folder6 = folderIds[5]; // Index 5 corresponds to '6. Faturas'
 
-
-
-
-
-        //
-
-        const folder6 = await drive.files.create({
-            resource: folderMetadata7,
-            fields: 'id',
-        });
-
-        //folder6 subfolder
+        // Create subfolders for each month
         for (const nameOfMonths of monthsArray) {
-            console.log(nameOfMonths);
 
             const subFolders = {
                 name: nameOfMonths,
                 mimeType: 'application/vnd.google-apps.folder',
-                parents: [folder6.data.id],
+                parents: [folder6],
             };
 
-            await drive.files.create({
-                resource: subFolders,
-                fields: 'id',
-            });
-
+            await createSubfolder(folder6, subFolders);
         }
-        //
 
-        //7
-        const folderMetadata8 = {
-            name: '7. Planos', // Replace with your desired subfolder name
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [subfolder.data.id],
-        };
-
-        const folder7 = await drive.files.create({
-            resource: folderMetadata8,
-            fields: 'id',
-        });
-
-        //8
-        const folderMetadata9 = {
-            name: '8. Tarefas', // Replace with your desired subfolder name
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [subfolder.data.id],
-        };
-
-        const folder8 = await drive.files.create({
-            resource: folderMetadata9,
-            fields: 'id',
-        });
-
-        //9
-        const folderMetadata10 = {
-            name: '9. Finanças', // Replace with your desired subfolder name
-            mimeType: 'application/vnd.google-apps.folder',
-            parents: [subfolder.data.id],
-        };
-        const folder9 = await drive.files.create({
-            resource: folderMetadata10,
-            fields: 'id',
-        });
-
-        //
-        //         Gdrive main folder ID: null
-        // Gdrive faturas folder ID: null
-        // Gdrive documentos folder ID: null
-        // Gdrive contratos de servicos folder ID: null
-        // Gdrive Contas bancarias folder ID: null
-        // Gdrive assembleias folder ID: null
-        // Gdrive fracoes folder ID: null
-        // Gdrive planos folder ID: null
-        // Gdrive tarefas folder ID: null
-        //
-
+        // Update Airtable with folder IDs
         try {
             const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableName}/${recordId}`;
             const updateData = {
                 fields: {
-                    "Gdrive main folder ID": subfolder.data.id,
-                    "Gdrive faturas folder ID": folder6.data.id,
-                    "Gdrive documentos folder ID": folder5.data.id,
-                    "Gdrive contratos de servicos folder ID": folder4.data.id,
-                    "Gdrive Contas bancarias folder ID": folder3.data.id,
-                    "Gdrive assembleias folder ID": folder2.data.id,
-                    "Gdrive fracoes folder ID": folder1.data.id,
-                    "Gdrive planos folder ID": folder7.data.id,
-                    "Gdrive tarefas folder ID": folder8.data.id,
-                    "Gdrive financas folder ID": folder9.data.id,
+                    "Gdrive main folder ID": mainFolderId,
+                    "Gdrive faturas folder ID": folderIds[5], // Index 5 corresponds to '6. Faturas'
+                    "Gdrive documentos folder ID": folderIds[4], // Index 4 corresponds to '5. Documentos'
+                    "Gdrive contratos de servicos folder ID": folderIds[3], // Index 3 corresponds to '4. Contratos de serviços'
+                    "Gdrive Contas bancarias folder ID": folderIds[2], // Index 2 corresponds to '3. Contas bancárias'
+                    "Gdrive assembleias folder ID": folderIds[1], // Index 1 corresponds to '2. Assembleias'
+                    "Gdrive fracoes folder ID": folderIds[0], // Index 0 corresponds to '1. Frações'
+                    "Gdrive planos folder ID": folderIds[6], // Index 6 corresponds to '7. Planos'
+                    "Gdrive tarefas folder ID": folderIds[7], // Index 7 corresponds to '8. Tarefas'
+                    "Gdrive financas folder ID": folderIds[8], // Index 8 corresponds to '9. Finanças'
                 },
             };
 
@@ -1235,32 +1351,29 @@ app.post('/create-folder', async (req, res) => {
                     Authorization: `Bearer ${AIRTABLE_API_KEY}`,
                 },
             });
-            // res.json(specificRecord);
-
         } catch (error) {
-            // res.send(error);
             console.log(error);
         }
 
-
+        // Respond with folder IDs
         res.json({
-            mainFolder: subfolder.data.id,
-            folder1: folder1.data.id,
-            folder2: folder2.data.id,
-            folder3: folder3.data.id,
-            folder4: folder4.data.id,
-            folder5: folder5.data.id,
-            folder6: folder6.data.id,
-            folder7: folder7.data.id,
-            folder8: folder8.data.id,
-            folder9: folder9.data.id,
-
+            mainFolder: mainFolderId,
+            folder1: folderIds[0],
+            folder2: folderIds[1],
+            folder3: folderIds[2],
+            folder4: folderIds[3],
+            folder5: folderIds[4],
+            folder6: folderIds[5],
+            folder7: folderIds[6],
+            folder8: folderIds[7],
+            folder9: folderIds[8],
         });
     } catch (error) {
         console.error('Error creating subfolder in Google Drive:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 
 //building folder
 app.post('/add-building-subfolder', async (req, res) => {
