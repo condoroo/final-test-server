@@ -1104,10 +1104,63 @@ app.post('/create-folder', async (req, res) => {
             parents: [subfolder.data.id],
         };
 
+        //Extra folder
+        function generateMonths() {
+            const monthsPerYear = 12;
+            const result = [];
+
+            // Get current date
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth() + 1; // Adding 1 because months are zero-indexed
+            const currentYear = currentDate.getFullYear();
+
+            // Start generating from the current month
+            let month = currentMonth;
+            let year = currentYear;
+
+            for (let i = 0; i < 36; i++) {
+                // Adjust year and month when necessary
+                if (month > monthsPerYear) {
+                    month = 1;
+                    year++;
+                }
+
+                const formattedMonth = `${(month < 10 ? '0' : '') + month}.${String(year).slice(2)} ${currentDate.toLocaleString('default', { month: 'short' })} ${String(year).slice(2)}`;
+                result.push(formattedMonth);
+
+                month++;
+            }
+
+            return result;
+        }
+
+        const monthsArray = generateMonths();
+
+
+        //
+
         const folder6 = await drive.files.create({
             resource: folderMetadata7,
             fields: 'id',
         });
+
+        //folder6 subfolder
+        for (const nameOfMonths of monthsArray) {
+            console.log(nameOfMonths);
+
+            const subFolders = {
+                name: nameOfMonths,
+                mimeType: 'application/vnd.google-apps.folder',
+                parents: [folder6.data.id],
+            };
+
+            await drive.files.create({
+                resource: subFolders,
+                fields: 'id',
+            });
+
+        }
+        //
 
         //7
         const folderMetadata8 = {
@@ -1197,6 +1250,7 @@ app.post('/create-folder', async (req, res) => {
             folder7: folder7.data.id,
             folder8: folder8.data.id,
             folder9: folder9.data.id,
+
         });
     } catch (error) {
         console.error('Error creating subfolder in Google Drive:', error);
