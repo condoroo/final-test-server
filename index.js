@@ -1239,6 +1239,8 @@ app.post('/create-new-subfolder-for-contratos-de-servicos', async (req, res) => 
                     },
                 });
 
+                console.log('this is folder id', subfolder.data.id);
+
                 res.json({ folderId: subfolder.data.id }); // Respond with the created folder ID
             } catch (error) {
                 console.log('Error updating Airtable:', error);
