@@ -454,7 +454,7 @@ app.post('/create-subscription', async (req, res) => {
     } = req.body;
     console.log(typeof (unitPrice))
     console.log('this is billing cycle anchor', billing_cycle_anchor);
-
+    console.log('This is is unit price', unitPrice);
 
     // Split the date string into month, day, and year
     const [month, day, year] = billing_cycle_anchor?.split('/');
@@ -843,6 +843,10 @@ app.post('/createInvoice', async (req, res) => {
         res.status(500).json({ code: 100, message: 'Internal Server Error' });
     }
 });
+
+
+
+
 // **************************************************************
 
 
@@ -1185,6 +1189,140 @@ app.post('/create-folder', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+// ++++++++++++++++++++++++++++++++++
+// Stripe Connect API
+// ++++++++++++++++++++++++++++++++++++
+// Endpoint to create an Account Link for an existing customer
+// Endpoint to create a Custom Connect account for an existing customer
+app.post('/create-connect-account', async (req, res) => {
+    try {
+        // Create a custom account for Portugal
+        const account = await stripe.accounts.create({
+            type: 'custom',
+            country: 'PT',
+            email: 'business.email@example.com', // Replace with the business email
+            business_type: 'company', // 'individual' or 'company' depending on your use case
+            capabilities: {
+                card_payments: { requested: true },
+                transfers: { requested: true },
+            },
+            company: {
+                name: 'CARR',
+                address: {
+                    line1: '123 Main Street',
+                    city: 'City',
+                    postal_code: '5400-800',
+                    state: 'State',
+                },
+                phone: '+351915245709', // Replace with the actual phone number
+                tax_id: '123-45-6789', // Replace with the actual tax ID
+                registration_number: '12345678', // Replace with the actual registration number
+                directors_provided: true,
+            },
+            tos_acceptance: {
+                date: Math.floor(Date.now() / 1000),
+                ip: req.ip, // Use the client's IP or your server's IP
+
+
+            },
+            external_account: {
+                object: 'bank_account',
+                country: 'PT',
+                currency: 'eur',
+                account_number: 'PT50000201231234567890154',
+                account_holder_name: 'Account Holder Name', // Replace with the actual account holder name
+                account_holder_type: 'individual', // 'individual' or 'company' depending on the account holder type
+                iban: 'PT50123456789012345678901', // Replace with the actual IBAN
+                account_holder_address: {
+                    line1: '123 Main Street',
+                    city: 'City',
+                    postal_code: '5400-800',
+                    state: 'State',
+                    country: 'PT',
+                },
+                // Add BIC if required
+                // bic: 'BIC_CODE',
+            },
+        });
+
+        console.log('Created Connect Account:', account);
+
+        const accountLink = await stripe.accountLinks.create({
+            account: account.id,
+            refresh_url: 'https://example.com/reauth',
+            return_url: 'https://example.com/return',
+            type: 'account_onboarding',
+        });
+
+        // Send the account ID back to the client or perform additional actions
+        res.json({
+            account_id: account.id
+            ,
+            accountLink: accountLink.url
+        });
+    } catch (error) {
+        console.error('Error creating Connect Account:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+
+//checkout api for connected account
+// Endpoint to create a Checkout Session for subscription payment
+app.post('/create-checkout-connect', async (req, res) => {
+    const {
+        accountId,
+        priceId,
+        userName,
+        userEmail,
+        unitPrice,
+        interval,
+        productName,
+        secretKey,
+        currency,
+        reDirectUrl,
+        imageUrl,
+        recordId,
+        billing_cycle_anchor,
+        trial_end,
+    } = req.body;
+
+    try {
+        const session = await stripe.checkout.sessions.create({
+            mode: 'subscription',
+            line_items: [
+                {
+                    price: 'price_1OKn4iJn0H8EEaz2iHnzqnPm',
+                    quantity: 1,
+                },
+            ],
+            subscription_data: {
+                application_fee_percent: 1.5,
+                transfer_data: {
+                    destination: 'acct_1OKmrfR3HxeT2dsc',
+                },
+            },
+            success_url: 'https://example.com/success',
+            cancel_url: 'https://example.com/cancel',
+        });
+        res.send({
+            url: session.url
+        })
+    } catch (err) {
+        console.log(err);
+    }
+
+
+});
+
+
+
+
+
+
+//+++++++++++++++++++++++++++++++++++++
 
 
 
