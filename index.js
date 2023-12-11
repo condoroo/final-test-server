@@ -489,7 +489,7 @@ app.post('/create-subscription', async (req, res) => {
 
         const priceData = {
             product: product.id,
-            unit_amount: Math.floor(unitPrice * 1000) / 1000 * 100, // Price in cents (multiply by 100)
+            unit_amount: Math.floor(unitPrice * 100).toFixed(2), // Price in cents (multiply by 100)
             currency: currency, // You can adjust the currency
         };
 
