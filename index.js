@@ -1318,16 +1318,9 @@ app.post('/create-folder', async (req, res) => {
         const monthsArray = generateMonths();
         console.log(monthsArray);
 
-        // Create subfolders for each month
+        // Create subfolders for each month inside '6. Faturas'
         for (const nameOfMonths of monthsArray) {
-
-            const subFolders = {
-                name: nameOfMonths,
-                mimeType: 'application/vnd.google-apps.folder',
-                parents: [folder6],
-            };
-
-            await createSubfolder(folder6, subFolders);
+            await createSubfolder(folder6, nameOfMonths);
         }
 
         // Update Airtable with folder IDs
@@ -1375,6 +1368,7 @@ app.post('/create-folder', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 
 
 //building folder
