@@ -1205,49 +1205,61 @@ app.post('/create-new-subfolder-for-contratos-de-servicos', async (req, res) => 
     const { tableNAME, parentFolderId, folderName, recordID } = req.body;
 
     try {
-        const auth = await authenticate();
-        const drive = google.drive({ version: 'v3', auth });
 
-        // Helper function to create a subfolder
-        const createSubfolder = async (parentFolderId, folderName) => {
+        try {
+            const auth = await authenticate(); // Authenticate with Google Drive API
+            const drive = google.drive({ version: 'v3', auth });
+
+            // Create subfolders in the specified folder
+
             const folderMetadata = {
                 name: folderName,
                 mimeType: 'application/vnd.google-apps.folder',
                 parents: [parentFolderId],
             };
 
-            const folder = await drive.files.create({
+            const subfolder = await drive.files.create({
                 resource: folderMetadata,
                 fields: 'id',
             });
 
-            return folder.data.id;
-        };
 
-        // Create subfolder
-        const folderId = await createSubfolder(parentFolderId, folderName);
-        console.log(folderId);
+            // Update Airtable with folder IDs
+            try {
+                const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableNAME}/${recordID}`;
+                const updateData = {
+                    fields: {
+                        "Gdrive contratos subfolder ID": subfolder.data.id,
+                    },
+                };
 
-        // Update Airtable with folder IDs
-        try {
-            const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${tableNAME}/${recordID}`;
-            const updateData = {
-                fields: {
-                    "Gdrive contratos subfolder ID": folderId,
-                },
-            };
+                await axios.patch(airtableURL, updateData, {
+                    headers: {
+                        Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                    },
+                });
 
-            await axios.patch(airtableURL, updateData, {
-                headers: {
-                    Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-                },
-            });
+                res.json({ folderId: subfolder.data.id }); // Respond with the created folder ID
+            } catch (error) {
+                console.log('Error updating Airtable:', error);
+                res.status(500).json({ error: 'Internal Server Error' });
+            }
 
-            res.json({ folderId }); // Respond with the created folder ID
-        } catch (error) {
-            console.log('Error updating Airtable:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
+
+
+
+            // Respond with the IDs of the created subfolders
+
+            // Update Airtable with the created subfolder IDs
+
+
+        } catch (googleDriveError) {
+            console.error('Error creating subfolders in Google Drive:', googleDriveError);
+            res.status(500).json({ error: 'Internal Server Error (Google Drive)' });
         }
+
+
+
 
     } catch (err) {
         console.log('Error creating new subfolder for contratos de', err);
