@@ -1204,6 +1204,40 @@ app.post('/create-folder', async (req, res) => {
     }
 });
 
+//building folder
+app.post('/add-building-subfolder', async (req, res) => {
+    const { field, folderId } = req.body;
+    console.log(field, folderId);
+
+    try {
+        const auth = await authenticate(); // Authenticate with Google Drive API
+        const drive = google.drive({ version: 'v3', auth });
+
+        // Create subfolders in the specified folder
+        const subfolderIds = [];
+        for (const folder of field) {
+            const folderMetadata = {
+                name: folder.name, // Use the name property from each object in the field array
+                mimeType: 'application/vnd.google-apps.folder',
+                parents: [folderId],
+            };
+
+            const subfolder = await drive.files.create({
+                resource: folderMetadata,
+                fields: 'id',
+            });
+
+            subfolderIds.push(subfolder.data.id);
+        }
+
+        // Respond with the IDs of the created subfolders
+        res.json({ subfolderIds });
+    } catch (error) {
+        console.error('Error creating subfolders in Google Drive:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 // ++++++++++++++++++++++++++++++++++
 // Stripe Connect API
 // ++++++++++++++++++++++++++++++++++++
