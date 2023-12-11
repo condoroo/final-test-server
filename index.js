@@ -1206,7 +1206,7 @@ app.post('/create-folder', async (req, res) => {
 
 //building folder
 app.post('/add-building-subfolder', async (req, res) => {
-    const { field, folderId } = req.body;
+    const { field, folderId, tableNAME } = req.body;
     console.log(field, folderId);
 
     try {
@@ -1217,7 +1217,7 @@ app.post('/add-building-subfolder', async (req, res) => {
         const subfolderIds = [];
         for (const folder of field) {
             const folderMetadata = {
-                name: folder.name, // Use the name property from each object in the field array
+                name: folder.name,
                 mimeType: 'application/vnd.google-apps.folder',
                 parents: [folderId],
             };
@@ -1231,12 +1231,16 @@ app.post('/add-building-subfolder', async (req, res) => {
         }
 
         // Respond with the IDs of the created subfolders
+
+        // Update Airtable with the created subfolder IDs
         res.json({ subfolderIds });
-    } catch (error) {
-        console.error('Error creating subfolders in Google Drive:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+
+    } catch (googleDriveError) {
+        console.error('Error creating subfolders in Google Drive:', googleDriveError);
+        res.status(500).json({ error: 'Internal Server Error (Google Drive)' });
     }
 });
+
 
 // ++++++++++++++++++++++++++++++++++
 // Stripe Connect API
