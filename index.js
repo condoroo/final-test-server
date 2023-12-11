@@ -1125,7 +1125,7 @@ app.post('/create-folder', async (req, res) => {
                     year++;
                 }
 
-                const formattedMonth = `${(month < 10 ? '0' : '') + month}.${String(year).slice(2)} ${currentDate.toLocaleString('default', { month: 'short' })} ${String(year).slice(2)}`;
+                const formattedMonth = `${String(year).slice(2)}.${(month < 10 ? '0' : '') + month} ${new Date(year, month - 1, 1).toLocaleString('default', { month: 'short' })} ${String(year).slice(2)}`;
                 result.push(formattedMonth);
 
                 month++;
@@ -1135,6 +1135,10 @@ app.post('/create-folder', async (req, res) => {
         }
 
         const monthsArray = generateMonths();
+        console.log(monthsArray);
+
+
+
 
 
         //
