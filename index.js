@@ -1348,27 +1348,34 @@ app.post('/create-new-subfolder-for-assembleias', async (req, res) => {
 // Endpoint to create an Account Link for an existing customer
 // Endpoint to create a Custom Connect account for an existing customer
 app.post('/create-connect-account', async (req, res) => {
+    const { email,
+        name,
+        phone,
+        tax_id,
+        iban,
+        account_number
+    } = req.body;
     try {
         // Create a custom account for Portugal
         const account = await stripe.accounts.create({
             type: 'custom',
             country: 'PT',
-            email: 'business.email@example.com', // Replace with the business email
+            email: email, // Replace with the business email
             business_type: 'company', // 'individual' or 'company' depending on your use case
             capabilities: {
                 card_payments: { requested: true },
                 transfers: { requested: true },
             },
             company: {
-                name: 'NEW ACC',
+                name: name,
                 address: {
                     line1: '',
                     city: '',
                     postal_code: '',
                     state: '',
                 },
-                phone: '+351915245709', // Replace with the actual phone number
-                tax_id: '123-45-6789', // Replace with the actual tax ID
+                phone: `${phone}`, // Replace with the actual phone number
+                tax_id: `${tax_id}`, // Replace with the actual tax ID
                 registration_number: `${Math.random(8)}`, // Replace with the actual registration number
                 directors_provided: true,
             },
@@ -1382,10 +1389,10 @@ app.post('/create-connect-account', async (req, res) => {
                 object: 'bank_account',
                 country: 'PT',
                 currency: 'eur',
-                account_number: 'PT50000201231234567890154',
-                account_holder_name: 'Account Holder Name', // Replace with the actual account holder name
+                account_number: `${account_number}`,
+                account_holder_name: name, // Replace with the actual account holder name
                 account_holder_type: 'individual', // 'individual' or 'company' depending on the account holder type
-                iban: 'PT50123456789012345678901', // Replace with the actual IBAN
+                iban: `${iban}`, // Replace with the actual IBAN
                 account_holder_address: {
                     line1: '',
                     city: '',
