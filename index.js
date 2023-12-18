@@ -1360,16 +1360,16 @@ app.post('/create-connect-account', async (req, res) => {
                 transfers: { requested: true },
             },
             company: {
-                name: 'CARR',
+                name: 'NEW ACC',
                 address: {
-                    line1: '123 Main Street',
-                    city: 'City',
-                    postal_code: '5400-800',
-                    state: 'State',
+                    line1: '',
+                    city: '',
+                    postal_code: '',
+                    state: '',
                 },
                 phone: '+351915245709', // Replace with the actual phone number
                 tax_id: '123-45-6789', // Replace with the actual tax ID
-                registration_number: '12345678', // Replace with the actual registration number
+                registration_number: `${Math.random(8)}`, // Replace with the actual registration number
                 directors_provided: true,
             },
             tos_acceptance: {
@@ -1387,10 +1387,10 @@ app.post('/create-connect-account', async (req, res) => {
                 account_holder_type: 'individual', // 'individual' or 'company' depending on the account holder type
                 iban: 'PT50123456789012345678901', // Replace with the actual IBAN
                 account_holder_address: {
-                    line1: '123 Main Street',
-                    city: 'City',
-                    postal_code: '5400-800',
-                    state: 'State',
+                    line1: '',
+                    city: '',
+                    postal_code: '',
+                    state: '',
                     country: 'PT',
                 },
                 // Add BIC if required
@@ -1472,9 +1472,9 @@ app.post('/create-checkout-connect', async (req, res) => {
 
 
 
-
-
-//+++++++++++++++++++++++++++++++++++++
+// ++++++++++++++++++++++++++++++++++
+// Stripe Connect API END
+// ++++++++++++++++++++++++++++++++++++
 
 
 
