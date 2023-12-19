@@ -1414,15 +1414,16 @@ app.post('/create-new-subfolder-for-tarefas', async (req, res) => {
 
 const stream = require('stream');
 
-// save a file from airtable and return its share link. TO DO
+// save a file from airtable and return its share link.
 app.post('/save-and-share-file', async (req, res) => {
-    const { airtableRecordId, folderId, airtableTableName, attachmentFieldName } = req.body;
+    const { airtableRecordId, folderId, airtableTableName, attachmentFieldName, airtableRecordIdColumn } = req.body;
 
     try {
+        // Authentications
         const auth = await authenticate();
         const drive = google.drive({ version: 'v3', auth });
 
-        // Initialize variables for pagination
+        // Initialize variables for table pagination
         let allRecords = [];
         let offset;
 
@@ -1439,16 +1440,17 @@ app.post('/save-and-share-file', async (req, res) => {
             offset = response.data.offset; // Airtable provides the next offset if more records are available
         } while (offset);
 
-        // Find the specific record
-        const specificRecord = allRecords.find(record => record.fields["Record ID (for stripe)"] == airtableRecordId);
+        // Find the specific record in that table (comparing the identifier that we passed with the column name that we defined as identifier)
+        const specificRecord = allRecords.find(record => record.fields[airtableRecordIdColumn] == airtableRecordId);
 
+        // If no file found
         if (!specificRecord || !specificRecord.fields[attachmentFieldName]) {
             throw new Error('Record or attachment not found');
         }
 
         console.log("This is the specific record: ", specificRecord);
 
-        console.log("A little bit more debug: ", specificRecord.fields[attachmentFieldName]);
+        console.log("This is the file information: ", specificRecord.fields[attachmentFieldName]);
 
         const fileUrl = specificRecord.fields[attachmentFieldName][0].url; 
         const fileName = specificRecord.fields[attachmentFieldName][0].filename;
