@@ -1422,19 +1422,29 @@ app.post('/save-and-share-file', async (req, res) => {
         const auth = await authenticate();
         const drive = google.drive({ version: 'v3', auth });
 
-        // Fetch the file URL from Airtable
-        const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${airtableTableName}`;
-        const response = await axios.get(airtableURL, {
-            headers: {
-                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
-            },
-        });
-        const records = response.data.records;
-        console.log(records);
-        const specificRecord = records.find(record => record["Record ID (for stripe)"] === airtableRecordId);
+        // Initialize variables for pagination
+        let allRecords = [];
+        let offset;
 
-        console.log(specificRecord);
+        do {
+            // Fetch records from Airtable with pagination
+            const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(airtableTableName)}` + (offset ? `?offset=${offset}` : '');
+            const response = await axios.get(airtableURL, {
+                headers: {
+                    Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                },
+            });
+
+            allRecords = allRecords.concat(response.data.records);
+            offset = response.data.offset; // Airtable provides the next offset if more records are available
+        } while (offset);
+
+        console.log(allRecords);
         
+        const specificRecord = records.find(record => record["Record ID (for stripe)"] === airtableRecordId);
+        
+        console.log(specificRecord);
+
         const fileUrl = specificRecord.data.fields[attachmentFieldName][0].url; 
         const fileName = specificRecord.data.fields[attachmentFieldName][0].filename;
 
