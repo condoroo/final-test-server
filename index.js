@@ -1438,12 +1438,57 @@ app.post('/save-and-share-file', async (req, res) => {
             allRecords = allRecords.concat(response.data.records);
             offset = response.data.offset; // Airtable provides the next offset if more records are available
         } while (offset);
-        
-        const specificRecord = allRecords.find(record => record["Record ID (for stripe)"] == airtableRecordId);
-        
-        console.log("This is the specificRecord", specificRecord);
 
-        res.status(200);
+        // Find the specific record
+        const specificRecord = allRecords.find(record => record['Record ID (for stripe)'] === airtableRecordId);
+
+        if (!specificRecord || !specificRecord.fields[attachmentFieldName]) {
+            throw new Error('Record or attachment not found');
+        }
+
+        const fileUrl = specificRecord.fields[attachmentFieldName][0].url; 
+        const fileName = specificRecord.fields[attachmentFieldName][0].filename;
+
+        // Download the file from the URL
+        const response2 = await axios({
+            url: fileUrl,
+            method: 'GET',
+            responseType: 'stream'
+        });
+
+        // Upload the file to Google Drive
+        const bufferStream = new stream.PassThrough();
+        bufferStream.end(response2.data);
+
+        const fileMetadata = {
+            name: fileName,
+            parents: [folderId]
+        };
+
+        const media = {
+            mimeType: response2.headers['content-type'],
+            body: bufferStream
+        };
+
+        const file = await drive.files.create({
+            resource: fileMetadata,
+            media: media,
+            fields: 'id'
+        });
+
+        // Make the file readable by anyone with the link
+        await drive.permissions.create({
+            fileId: file.data.id,
+            requestBody: {
+                role: 'reader',
+                type: 'anyone'
+            }
+        });
+
+        // Generate the shareable link
+        const shareableLink = `https://drive.google.com/file/d/${file.data.id}/view`;
+
+        res.json({ fileShareableLink: shareableLink });
         
     } catch (error) {
         console.error('Error saving and sharing file:', error);
