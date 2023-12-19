@@ -1414,7 +1414,7 @@ app.post('/create-new-subfolder-for-tarefas', async (req, res) => {
 
 const stream = require('stream');
 
-// save a file from airtable and return its share link
+// save a file from airtable and return its share link. TO DO
 app.post('/save-and-share-file', async (req, res) => {
     const { airtableRecordId, folderId, airtableTableName, attachmentFieldName } = req.body;
 
@@ -1438,6 +1438,14 @@ app.post('/save-and-share-file', async (req, res) => {
             allRecords = allRecords.concat(response.data.records);
             offset = response.data.offset; // Airtable provides the next offset if more records are available
         } while (offset);
+
+        allRecords.forEach(record => {
+            if (record.fields["Record ID (for stripe)"]) {
+                console.log(record.fields["Record ID (for stripe)"]);
+            }
+        });
+
+        console.log("This is the airtableRecordId: ", airtableRecordId);
 
         // Find the specific record
         const specificRecord = allRecords.find(record => record['Record ID (for stripe)'] === airtableRecordId);
