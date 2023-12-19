@@ -1424,14 +1424,24 @@ app.post('/save-and-share-file', async (req, res) => {
         const drive = google.drive({ version: 'v3', auth });
 
         // Fetch the file URL from Airtable
-        const airtableResponse = await axios.get(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(airtableTableName)}/${airtableRecordId}`, {
-            headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
+        const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${airtableTableName}`;
+        const response = await axios.get(airtableURL, {
+            headers: {
+                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+            },
         });
-        const fileUrl = airtableResponse.data.fields[attachmentFieldName][0].url; 
-        const fileName = airtableResponse.data.fields[attachmentFieldName][0].filename;
+        const records = response.data.records;
+        // console.log(records);
+        const specificRecord = records.find(record => record["Record ID (for stripe)"] === airtableRecordId);
+        
+        const fileUrl = specificRecord.data.fields[attachmentFieldName][0].url; 
+        const fileName = specificRecord.data.fields[attachmentFieldName][0].filename;
+
+        console.error('File URL: ', fileUrl);
+        console.error('File Name: ', fileName);
 
         // Download the file from the URL
-        const response = await axios({
+        const response2 = await axios({
             url: fileUrl,
             method: 'GET',
             responseType: 'stream'
@@ -1439,7 +1449,7 @@ app.post('/save-and-share-file', async (req, res) => {
 
         // Upload the file to Google Drive
         const bufferStream = new stream.PassThrough();
-        bufferStream.end(response.data);
+        bufferStream.end(response2.data);
 
         const fileMetadata = {
             name: fileName,
