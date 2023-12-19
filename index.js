@@ -1439,11 +1439,12 @@ app.post('/save-and-share-file', async (req, res) => {
             offset = response.data.offset; // Airtable provides the next offset if more records are available
         } while (offset);
         
-        const specificRecord = allRecords.find(record => record["Record ID (for stripe)"] === airtableRecordId);
+        const specificRecord = allRecords.find(record => record["Record ID (for stripe)"] == airtableRecordId);
         
         console.log("This is the specificRecord", specificRecord);
 
-        res.status(200).send();
+        res.status(200);
+        
     } catch (error) {
         console.error('Error saving and sharing file:', error);
         res.status(500).send('Internal Server Error');
