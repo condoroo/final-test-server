@@ -1440,16 +1440,16 @@ app.post('/save-and-share-file', async (req, res) => {
         } while (offset);
 
         console.log(allRecords);
+
+        const specificRecord = allRecords.find(record => record["Record ID (for stripe)"] === airtableRecordId);
         
-        const specificRecord = records.find(record => record["Record ID (for stripe)"] === airtableRecordId);
-        
-        console.log(specificRecord);
+        console.log("This is the specificRecord", specificRecord);
 
         const fileUrl = specificRecord.data.fields[attachmentFieldName][0].url; 
         const fileName = specificRecord.data.fields[attachmentFieldName][0].filename;
 
-        console.error('File URL: ', fileUrl);
-        console.error('File Name: ', fileName);
+        console.log('File URL: ', fileUrl);
+        console.log('File Name: ', fileName);
 
         // Download the file from the URL
         const response2 = await axios({
