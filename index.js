@@ -1448,6 +1448,8 @@ app.post('/save-and-share-file', async (req, res) => {
 
         console.log("This is the specific record: ", specificRecord);
 
+        console.log("A little bit more debug: ", specificRecord.fields[attachmentFieldName]);
+
         const fileUrl = specificRecord.fields[attachmentFieldName][0].url; 
         const fileName = specificRecord.fields[attachmentFieldName][0].filename;
 
