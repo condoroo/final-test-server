@@ -1439,22 +1439,14 @@ app.post('/save-and-share-file', async (req, res) => {
             offset = response.data.offset; // Airtable provides the next offset if more records are available
         } while (offset);
 
-        allRecords.forEach(record => {
-            if (record.fields["Record ID (for stripe)"]) {
-                console.log("each record:", record.fields["Record ID (for stripe)"]);
-                let temp = record.fields["Record ID (for stripe)"] == airtableRecordId;
-                console.log("Result: ", temp);
-            }
-        });
-
-        console.log("This is the airtableRecordId: ", airtableRecordId);
-
         // Find the specific record
-        const specificRecord = allRecords.find(record => record['Record ID (for stripe)'] == airtableRecordId);
+        const specificRecord = allRecords.find(record => record.fields["Record ID (for stripe)"] == airtableRecordId);
 
         if (!specificRecord || !specificRecord.fields[attachmentFieldName]) {
             throw new Error('Record or attachment not found');
         }
+
+        console.log("This is the specific record: ", specificRecord);
 
         const fileUrl = specificRecord.fields[attachmentFieldName][0].url; 
         const fileName = specificRecord.fields[attachmentFieldName][0].filename;
