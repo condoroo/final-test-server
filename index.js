@@ -1432,6 +1432,8 @@ app.post('/save-and-share-file', async (req, res) => {
         const records = response.data.records;
         // console.log(records);
         const specificRecord = records.find(record => record["Record ID (for stripe)"] === airtableRecordId);
+
+        console.log(specificRecord);
         
         const fileUrl = specificRecord.data.fields[attachmentFieldName][0].url; 
         const fileName = specificRecord.data.fields[attachmentFieldName][0].filename;
