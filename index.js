@@ -1438,59 +1438,12 @@ app.post('/save-and-share-file', async (req, res) => {
             allRecords = allRecords.concat(response.data.records);
             offset = response.data.offset; // Airtable provides the next offset if more records are available
         } while (offset);
-
-        console.log(allRecords);
-
+        
         const specificRecord = allRecords.find(record => record["Record ID (for stripe)"] === airtableRecordId);
         
         console.log("This is the specificRecord", specificRecord);
 
-        const fileUrl = specificRecord.data.fields[attachmentFieldName][0].url; 
-        const fileName = specificRecord.data.fields[attachmentFieldName][0].filename;
-
-        console.log('File URL: ', fileUrl);
-        console.log('File Name: ', fileName);
-
-        // Download the file from the URL
-        const response2 = await axios({
-            url: fileUrl,
-            method: 'GET',
-            responseType: 'stream'
-        });
-
-        // Upload the file to Google Drive
-        const bufferStream = new stream.PassThrough();
-        bufferStream.end(response2.data);
-
-        const fileMetadata = {
-            name: fileName,
-            parents: [folderId]
-        };
-
-        const media = {
-            mimeType: response.headers['content-type'],
-            body: bufferStream
-        };
-
-        const file = await drive.files.create({
-            resource: fileMetadata,
-            media: media,
-            fields: 'id'
-        });
-
-        // Make the file readable by anyone with the link
-        await drive.permissions.create({
-            fileId: file.data.id,
-            requestBody: {
-                role: 'reader',
-                type: 'anyone'
-            }
-        });
-
-        // Generate the shareable link
-        const shareableLink = `https://drive.google.com/file/d/${file.data.id}/view`;
-
-        res.json({ fileShareableLink: shareableLink });
+        res.status(200).send();
     } catch (error) {
         console.error('Error saving and sharing file:', error);
         res.status(500).send('Internal Server Error');
