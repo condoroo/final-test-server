@@ -1460,10 +1460,13 @@ app.post('/save-and-share-file', async (req, res) => {
             responseType: 'stream'
         });
 
-        // Upload the file to Google Drive
+        // Create a pass-through stream to buffer the file data
         const bufferStream = new stream.PassThrough();
-        bufferStream.end(response2.data);
 
+        // Pipe the data from the response stream to the buffer stream
+        response2.data.pipe(bufferStream);
+
+        // Upload the file to Google Drive
         const fileMetadata = {
             name: fileName,
             parents: [folderId]
