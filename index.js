@@ -1411,6 +1411,72 @@ app.post('/create-new-subfolder-for-tarefas', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+const axios = require('axios');
+const stream = require('stream');
+
+// save a file from airtable and return its share link
+app.post('/save-and-share-file', async (req, res) => {
+    const { airtableRecordId, folderId, airtableTableName, attachmentFieldName } = req.body;
+
+    try {
+        const auth = await authenticate();
+        const drive = google.drive({ version: 'v3', auth });
+
+        // Fetch the file URL from Airtable
+        const airtableResponse = await axios.get(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(airtableTableName)}/${airtableRecordId}`, {
+            headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` }
+        });
+        const fileUrl = airtableResponse.data.fields[attachmentFieldName][0].url; 
+        const fileName = airtableResponse.data.fields[attachmentFieldName][0].filename;
+
+        // Download the file from the URL
+        const response = await axios({
+            url: fileUrl,
+            method: 'GET',
+            responseType: 'stream'
+        });
+
+        // Upload the file to Google Drive
+        const bufferStream = new stream.PassThrough();
+        bufferStream.end(response.data);
+
+        const fileMetadata = {
+            name: fileName,
+            parents: [folderId]
+        };
+
+        const media = {
+            mimeType: response.headers['content-type'],
+            body: bufferStream
+        };
+
+        const file = await drive.files.create({
+            resource: fileMetadata,
+            media: media,
+            fields: 'id'
+        });
+
+        // Make the file readable by anyone with the link
+        await drive.permissions.create({
+            fileId: file.data.id,
+            requestBody: {
+                role: 'reader',
+                type: 'anyone'
+            }
+        });
+
+        // Generate the shareable link
+        const shareableLink = `https://drive.google.com/file/d/${file.data.id}/view`;
+
+        res.json({ fileShareableLink: shareableLink });
+    } catch (error) {
+        console.error('Error saving and sharing file:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+//
 //
 
 
