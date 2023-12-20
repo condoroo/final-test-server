@@ -1678,9 +1678,14 @@ app.post('/create-manual-checkout-session', async (req, res) => {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: [{
-                name: description,
-                amount: amount,
-                currency: currency,
+                price_data: {
+                    currency: currency,
+                    product_data: {
+                        name: description,
+                        // You can also add 'description' and 'images' here if needed
+                    },
+                    unit_amount: parseInt(amount), // Convert string to integer and ensure the amount is in the smallest currency unit (e.g., cents for EUR)
+                },
                 quantity: 1,
             }],
             mode: 'payment',
@@ -1696,6 +1701,7 @@ app.post('/create-manual-checkout-session', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
 
 
 
