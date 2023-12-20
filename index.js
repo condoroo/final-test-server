@@ -1676,7 +1676,7 @@ app.post('/create-manual-checkout-session', async (req, res) => {
 
     try {
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card', 'google_pay', 'apple_pay', 'multibanco'],
+            payment_method_types: ['card'],
             line_items: [{
                 name: description,
                 amount: amount,
