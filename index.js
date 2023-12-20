@@ -1643,6 +1643,60 @@ app.post('/create-checkout-connect', async (req, res) => {
 
 });
 
+//
+
+app.post('/create-recurring-checkout-session', async (req, res) => {
+    const { connectedAccountId, priceId } = req.body; // priceId should be for a recurring product
+
+    try {
+        const session = await stripe.checkout.sessions.create({
+            mode: 'subscription',
+            payment_method_types: ['sepa_debit'],
+            line_items: [{
+                price: priceId,
+                quantity: 1,
+            }],
+            success_url: 'https://condoroo.ai/',
+            cancel_url: 'https://condoroo.ai/',
+        }, {
+            stripeAccount: connectedAccountId,
+        });
+
+        res.json({ url: session.url });
+    } catch (error) {
+        console.error('Error creating recurring checkout session:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+//
+
+app.post('/create-manual-checkout-session', async (req, res) => {
+    const { connectedAccountId, amount, currency, description } = req.body;
+
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card', 'google_pay', 'apple_pay', 'multibanco'],
+            line_items: [{
+                name: description,
+                amount: amount,
+                currency: currency,
+                quantity: 1,
+            }],
+            mode: 'payment',
+            success_url: 'https://condoroo.ai/',
+            cancel_url: 'https://condoroo.ai/',
+        }, {
+            stripeAccount: connectedAccountId,
+        });
+
+        res.json({ url: session.url });
+    } catch (error) {
+        console.error('Error creating manual checkout session:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 
 
