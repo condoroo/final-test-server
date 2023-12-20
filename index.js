@@ -1651,7 +1651,7 @@ app.post('/create-recurring-checkout-session', async (req, res) => {
     try {
         const session = await stripe.checkout.sessions.create({
             mode: 'subscription',
-            payment_method_types: ['sepa_debit'],
+            payment_method_types: ['card'],
             line_items: [{
                 price: priceId,
                 quantity: 1,
