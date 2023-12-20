@@ -1440,7 +1440,7 @@ app.post('/save-and-share-file', async (req, res) => {
             offset = response.data.offset; // Airtable provides the next offset if more records are available
         } while (offset);
 
-        // Find the specific record in that table (comparing the identifier that we passed with the column name that we defined as identifier)
+        // Find the specific record in that table
         const specificRecord = allRecords.find(record => record.fields[airtableRecordIdColumn] == airtableRecordId);
 
         // If no file found
@@ -1449,65 +1449,59 @@ app.post('/save-and-share-file', async (req, res) => {
         }
 
         console.log("This is the specific record: ", specificRecord);
+        console.log("This is the file information: ", specificRecord.fields[attachmentFieldName]);
 
-        const attachments = specificRecord.fields[attachmentFieldName];
-        const shareableLinks = [];
+        const fileUrl = specificRecord.fields[attachmentFieldName][0].url; 
+        const fileName = specificRecord.fields[attachmentFieldName][0].filename;
 
-        // Process each file
-        for (const attachment of attachments) {
-            const fileUrl = attachment.url;
-            const fileName = attachment.filename;
+        // Download the file from the URL
+        const response2 = await axios({
+            url: fileUrl,
+            method: 'GET',
+            responseType: 'stream'
+        });
 
-            // Download the file from the URL
-            const response2 = await axios({
-                url: fileUrl,
-                method: 'GET',
-                responseType: 'stream'
-            });
+        // Create a pass-through stream to buffer the file data
+        const bufferStream = new stream.PassThrough();
+        response2.data.pipe(bufferStream);
 
-            // Create a pass-through stream to buffer the file data
-            const bufferStream = new stream.PassThrough();
-            response2.data.pipe(bufferStream);
+        // Upload the file to Google Drive
+        const fileMetadata = {
+            name: fileName,
+            parents: [folderId]
+        };
 
-            // Upload the file to Google Drive
-            const fileMetadata = {
-                name: fileName,
-                parents: [folderId]
-            };
+        const media = {
+            mimeType: response2.headers['content-type'],
+            body: bufferStream
+        };
 
-            const media = {
-                mimeType: response2.headers['content-type'],
-                body: bufferStream
-            };
+        const file = await drive.files.create({
+            resource: fileMetadata,
+            media: media,
+            fields: 'id'
+        });
 
-            const file = await drive.files.create({
-                resource: fileMetadata,
-                media: media,
-                fields: 'id'
-            });
+        // Make the file readable by anyone with the link
+        await drive.permissions.create({
+            fileId: file.data.id,
+            requestBody: {
+                role: 'reader',
+                type: 'anyone'
+            }
+        });
 
-            // Make the file readable by anyone with the link
-            await drive.permissions.create({
-                fileId: file.data.id,
-                requestBody: {
-                    role: 'reader',
-                    type: 'anyone'
-                }
-            });
+        // Generate the shareable link
+        const shareableLink = `https://drive.google.com/file/d/${file.data.id}/view`;
 
-            // Generate the shareable link for this file and add it to the array
-            const shareableLink = `https://drive.google.com/file/d/${file.data.id}/view`;
-            shareableLinks.push({ fileName: fileName, link: shareableLink });
-        }
-
-        // Return all the shareable links
-        res.json({ fileShareableLinks: shareableLinks });
+        res.json({ fileShareableLink: shareableLink });
         
     } catch (error) {
         console.error('Error saving and sharing file:', error);
         res.status(500).send('Internal Server Error');
     }
 });
+
 
 //
 //
