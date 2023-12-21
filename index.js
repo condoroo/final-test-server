@@ -1465,10 +1465,13 @@ app.post('/save-and-share-file', async (req, res) => {
         const bufferStream = new stream.PassThrough();
         response2.data.pipe(bufferStream);
 
+        // Check if folder is an array or an element
+        const targetFolderId = Array.isArray(folderId) ? folderId[0] : folderId;
+
         // Upload the file to Google Drive
         const fileMetadata = {
             name: fileName,
-            parents: [folderId]
+            parents: [targetFolderId]
         };
 
         const media = {
