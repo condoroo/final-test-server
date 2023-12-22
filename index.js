@@ -230,9 +230,9 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                         const updateData = {
                             fields: {
                                 "Last successful payment date (for stripe)": convertUnixTimestampToDate(paymentIntentSucceed.created),
-                                "Last successful payment ID (for stipe)": paymentIntentSucceed.id,
-                                "Last successful payment amount (for stipe)": paymentIntentSucceed.amount / 100,
-                                "Last successful payment method (for stipe)": paymentIntentSucceed.payment_method,
+                                "Last successful payment ID (for stripe)": paymentIntentSucceed.id,
+                                "Last successful payment amount (for stripe)": paymentIntentSucceed.amount / 100,
+                                "Last successful payment method (for stripe)": paymentIntentSucceed.payment_method,
                                 "Last outstanding balance (for stripe)": paymentIntentSucceed.amount_remaining / 100
 
                             },
@@ -298,8 +298,8 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                         const updateData = {
                             fields: {
                                 "Last failed payment date (for stripe)": failedDate,
-                                "Last failed payment ID (for stipe)": customerInvoiceFailed.id,
-                                "Last failed payment amount (for stipe)": customerInvoiceFailed.amount_remaining / 100,
+                                "Last failed payment ID (for stripe)": customerInvoiceFailed.id,
+                                "Last failed payment amount (for stripe)": customerInvoiceFailed.amount_remaining / 100,
                                 "Last outstanding balance (for stripe)": customerInvoiceFailed.amount_remaining / 100
 
                             },
@@ -360,7 +360,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                 })
 
                 // Fetch the existing data from the field you want to update
-                const existingData = matchingRecord.fields['Last successful payment receipt URL (for stipe)'] || '';
+                const existingData = matchingRecord.fields['Last successful payment receipt URL (for stripe)'] || '';
                 const newDataValue = invoicePaymentIntentSucceed.hosted_invoice_url;
                 // Append the new data to the existing data
                 const newData = `Pagamento efetuado em: ${convertUnixTimestampToDate(invoicePaymentIntentSucceed.status_transitions.paid_at)} ${newDataValue} \n\n ${existingData}`;
@@ -373,7 +373,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                         const updateData = {
                             fields: {
                                 "Last outstanding balance (for stripe)": invoicePaymentIntentSucceed.amount_remaining / 100,
-                                "Last successful payment receipt URL (for stipe)": newData,
+                                "Last successful payment receipt URL (for stripe)": newData,
                                 "Last successful payment date (for stripe)": convertUnixTimestampToDate(invoicePaymentIntentSucceed.status_transitions.paid_at)
 
                             },
