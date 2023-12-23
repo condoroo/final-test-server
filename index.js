@@ -1647,7 +1647,7 @@ app.post('/create-checkout-connect', async (req, res) => {
 //
 
 app.post('/create-recurring-checkout-session', async (req, res) => {
-    const { connectedAccountId, productName, priceAmount } = req.body;
+    const { connectedAccountId, productName, currency, priceAmount } = req.body;
 
     try {
         // Create a new product
@@ -1660,8 +1660,8 @@ app.post('/create-recurring-checkout-session', async (req, res) => {
         // Create a price for the product
         const price = await stripe.prices.create({
             unit_amount: priceAmount,
-            currency: 'usd', // Change to your preferred currency
-            recurring: { interval: 'month' }, // or 'year', etc.
+            currency: currency,
+            recurring: { interval: 'month' }, 
             product: product.id,
         }, {
             stripeAccount: connectedAccountId,
