@@ -1647,14 +1647,32 @@ app.post('/create-checkout-connect', async (req, res) => {
 //
 
 app.post('/create-recurring-checkout-session', async (req, res) => {
-    const { connectedAccountId, priceId } = req.body; // priceId should be for a recurring product
+    const { connectedAccountId, productName, priceAmount } = req.body;
 
     try {
+        // Create a new product
+        const product = await stripe.products.create({
+            name: productName,
+        }, {
+            stripeAccount: connectedAccountId,
+        });
+
+        // Create a price for the product
+        const price = await stripe.prices.create({
+            unit_amount: priceAmount,
+            currency: 'usd', // Change to your preferred currency
+            recurring: { interval: 'month' }, // or 'year', etc.
+            product: product.id,
+        }, {
+            stripeAccount: connectedAccountId,
+        });
+
+        // Create the checkout session with the new price ID
         const session = await stripe.checkout.sessions.create({
             mode: 'subscription',
             payment_method_types: ['card'],
             line_items: [{
-                price: priceId,
+                price: price.id,
                 quantity: 1,
             }],
             success_url: 'https://condoroo.ai/',
@@ -1669,6 +1687,7 @@ app.post('/create-recurring-checkout-session', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
 
 //
 
