@@ -1751,7 +1751,7 @@ app.post('/create-manual-checkout-session-with-extra-quotas', async (req, res) =
                         product_data: {
                             name: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize the first letter
                         },
-                        unit_amount: parseInt(value)
+                        unit_amount: parseInt(value) * 100 // changing value to cents
                     },
                     quantity: 1,
                 });
