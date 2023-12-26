@@ -1737,7 +1737,7 @@ app.post('/create-manual-checkout-session-with-extra-quotas', async (req, res) =
                 product_data: {
                     name: 'Quotas',
                 },
-                unit_amount: amount * 100, // Assuming 'quotas' is in euros
+                unit_amount: parseInt(amount),
             },
             quantity: 1,
         });
@@ -1751,7 +1751,7 @@ app.post('/create-manual-checkout-session-with-extra-quotas', async (req, res) =
                         product_data: {
                             name: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize the first letter
                         },
-                        unit_amount: value * 100, // Convert to cents
+                        unit_amount: parseInt(value)
                     },
                     quantity: 1,
                 });
