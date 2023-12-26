@@ -1722,6 +1722,61 @@ app.post('/create-manual-checkout-session', async (req, res) => {
     }
 });
 
+//
+
+app.post('/create-manual-checkout-session-with-extra-quotas', async (req, res) => {
+    const { connectedAccountId, amount, items, currency, description } = req.body;
+
+    try {
+        let lineItems = [];
+
+        // Always include quotas as a certain item
+        lineItems.push({
+            price_data: {
+                currency: 'eur',
+                product_data: {
+                    name: 'Quotas',
+                },
+                unit_amount: amount * 100, // Assuming 'quotas' is in euros
+            },
+            quantity: 1,
+        });
+
+        // Add other items dynamically
+        for (let [key, value] of Object.entries(items)) {
+            if (key !== 'quotas') { // Skip quotas as it's already added
+                lineItems.push({
+                    price_data: {
+                        currency: 'eur',
+                        product_data: {
+                            name: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize the first letter
+                        },
+                        unit_amount: value * 100, // Convert to cents
+                    },
+                    quantity: 1,
+                });
+            }
+        }
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: lineItems,
+            mode: 'payment',
+            success_url: 'https://condoroo.ai/',
+            cancel_url: 'https://condoroo.ai/',
+        }, {
+            stripeAccount: connectedAccountId,
+        });
+
+        res.json({ url: session.url });
+    } catch (error) {
+        console.error('Error creating manual checkout session:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+//
+
 
 
 
