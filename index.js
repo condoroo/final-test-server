@@ -1666,7 +1666,7 @@ app.post('/create-recurring-checkout-session', async (req, res) => {
 
         // Create a price for the product
         const price = await stripe.prices.create({
-            unit_amount: priceAmount,
+            unit_amount: priceAmount * 100,
             currency: currency,
             recurring: { interval: 'month' }, 
             product: product.id,
@@ -1750,7 +1750,7 @@ app.post('/create-manual-checkout-session', async (req, res) => {
                         name: description,
                         // You can also add 'description' and 'images' here if needed
                     },
-                    unit_amount: parseFloat(amount), // Convert string to integer and ensure the amount is in the smallest currency unit (e.g., cents for EUR)
+                    unit_amount: parseFloat(amount) * 100, // Convert string to integer and ensure the amount is in the smallest currency unit (e.g., cents for EUR)
                 },
                 quantity: 1,
             }],
@@ -1783,7 +1783,7 @@ app.post('/create-manual-checkout-session-with-extra-quotas', async (req, res) =
                 product_data: {
                     name: 'Quotas',
                 },
-                unit_amount: parseFloat(amount),
+                unit_amount: parseFloat(amount) * 100,
             },
             quantity: 1,
         });
