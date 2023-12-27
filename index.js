@@ -1720,7 +1720,7 @@ app.post('/add-extra-fee', async (req, res) => {
         // Add a one-time invoice item for the extra fee
         await stripe.invoiceItems.create({
             customer: customerId,
-            amount: extraAmount, // amount in cents
+            amount: extraAmount * 100, // amount in cents
             currency: subscription.plan.currency,
             description: 'Extra fee for this month',
         }, {
