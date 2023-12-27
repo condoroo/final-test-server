@@ -1704,7 +1704,7 @@ app.post('/create-manual-checkout-session', async (req, res) => {
                         name: description,
                         // You can also add 'description' and 'images' here if needed
                     },
-                    unit_amount: parseInt(amount), // Convert string to integer and ensure the amount is in the smallest currency unit (e.g., cents for EUR)
+                    unit_amount: parseFloat(amount), // Convert string to integer and ensure the amount is in the smallest currency unit (e.g., cents for EUR)
                 },
                 quantity: 1,
             }],
@@ -1737,7 +1737,7 @@ app.post('/create-manual-checkout-session-with-extra-quotas', async (req, res) =
                 product_data: {
                     name: 'Quotas',
                 },
-                unit_amount: parseInt(amount),
+                unit_amount: parseFloat(amount),
             },
             quantity: 1,
         });
@@ -1751,7 +1751,7 @@ app.post('/create-manual-checkout-session-with-extra-quotas', async (req, res) =
                         product_data: {
                             name: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize the first letter
                         },
-                        unit_amount: parseInt(value) * 100 // changing value to cents
+                        unit_amount: parseFloat(value) * 100 // changing value to cents
                     },
                     quantity: 1,
                 });
