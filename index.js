@@ -1696,6 +1696,44 @@ app.post('/create-recurring-checkout-session', async (req, res) => {
     }
 });
 
+//
+
+app.post('/add-extra-fee', async (req, res) => {
+    const { connectedAccountId, customerId, extraAmount } = req.body;
+
+    try {
+        // Retrieve the customer's current subscription
+        const subscriptions = await stripe.subscriptions.list({
+            customer: customerId,
+            status: 'active',
+            limit: 1,
+        }, {
+            stripeAccount: connectedAccountId,
+        });
+
+        if (subscriptions.data.length === 0) {
+            return res.status(404).send('No active subscription found for customer');
+        }
+
+        const subscription = subscriptions.data[0];
+
+        // Add a one-time invoice item for the extra fee
+        await stripe.invoiceItems.create({
+            customer: customerId,
+            amount: extraAmount, // amount in cents
+            currency: subscription.plan.currency,
+            description: 'Extra fee for this month',
+        }, {
+            stripeAccount: connectedAccountId,
+        });
+
+        res.send('Extra fee added to next invoice');
+    } catch (error) {
+        console.error('Error adding extra fee:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 //
 
