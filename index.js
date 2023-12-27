@@ -1647,9 +1647,16 @@ app.post('/create-checkout-connect', async (req, res) => {
 //
 
 app.post('/create-recurring-checkout-session', async (req, res) => {
-    const { connectedAccountId, productName, currency, priceAmount } = req.body;
+    const { connectedAccountId, productName, currency, priceAmount, customerEmail } = req.body;
 
     try {
+        // Create a new customer
+        const customer = await stripe.customers.create({
+            email: customerEmail, // Assuming you have the customer's email
+        }, {
+            stripeAccount: connectedAccountId,
+        });
+
         // Create a new product
         const product = await stripe.products.create({
             name: productName,
@@ -1667,10 +1674,11 @@ app.post('/create-recurring-checkout-session', async (req, res) => {
             stripeAccount: connectedAccountId,
         });
 
-        // Create the checkout session with the new price ID
+        // Create the checkout session with the new price ID and the customer ID
         const session = await stripe.checkout.sessions.create({
             mode: 'subscription',
             payment_method_types: ['card'],
+            customer: customer.id, // Use the customer ID here
             line_items: [{
                 price: price.id,
                 quantity: 1,
@@ -1681,7 +1689,7 @@ app.post('/create-recurring-checkout-session', async (req, res) => {
             stripeAccount: connectedAccountId,
         });
 
-        res.json({ url: session.url });
+        res.json({ url: session.url, customerId: customer.id });
     } catch (error) {
         console.error('Error creating recurring checkout session:', error);
         res.status(500).send('Internal Server Error');
