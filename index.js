@@ -1699,7 +1699,7 @@ app.post('/create-recurring-checkout-session', async (req, res) => {
 //
 
 app.post('/add-extra-fee', async (req, res) => {
-    const { connectedAccountId, customerId, extraAmount } = req.body;
+    const { connectedAccountId, customerId, items } = req.body; // items is an array of { description, price }
 
     try {
         // Retrieve the customer's current subscription
@@ -1717,22 +1717,25 @@ app.post('/add-extra-fee', async (req, res) => {
 
         const subscription = subscriptions.data[0];
 
-        // Add a one-time invoice item for the extra fee
-        await stripe.invoiceItems.create({
-            customer: customerId,
-            amount: extraAmount * 100, // amount in cents
-            currency: subscription.plan.currency,
-            description: 'Extra fee for this month',
-        }, {
-            stripeAccount: connectedAccountId,
-        });
+        // Iterate over each item and add them as a one-time invoice item
+        for (const item of items) {
+            await stripe.invoiceItems.create({
+                customer: customerId,
+                amount: item.price * 100, // assuming price is in dollars and needs to be converted to cents
+                currency: subscription.plan.currency,
+                description: item.description,
+            }, {
+                stripeAccount: connectedAccountId,
+            });
+        }
 
-        res.send('Extra fee added to next invoice');
+        res.send('Extra fees added to next invoice');
     } catch (error) {
-        console.error('Error adding extra fee:', error);
+        console.error('Error adding extra fees:', error);
         res.status(500).send('Internal Server Error');
     }
 });
+
 
 
 //
