@@ -1666,7 +1666,7 @@ app.post('/create-recurring-checkout-session', async (req, res) => {
 
         // Create a price for the product
         const price = await stripe.prices.create({
-            unit_amount: Math.ceil(priceAmount * 1.05 * 100), // converting price to cents and applying 5% fee
+            unit_amount: Math.ceil(priceAmount * 100), // converting price to cents and applying 5% fee
             currency: currency,
             recurring: { interval: 'month' }, 
             product: product.id,
@@ -1721,7 +1721,7 @@ app.post('/add-extra-fee', async (req, res) => {
         for (const item of items) {
             await stripe.invoiceItems.create({
                 customer: customerId,
-                amount: Math.ceil(item.price * 100 * 1.05), // converting price to cents and applying 5% fee
+                amount: Math.ceil(item.price * 100), // converting price to cents and applying 5% fee
                 currency: subscription.plan.currency,
                 description: item.description,
             }, {
@@ -1786,7 +1786,7 @@ app.post('/create-manual-checkout-session-with-extra-quotas', async (req, res) =
                 product_data: {
                     name: 'Quotas',
                 },
-                unit_amount: Math.ceil(parseFloat(amount) * 100 * 1.05), // converting price to cents and applying 5% fee
+                unit_amount: Math.ceil(parseFloat(amount) * 100), // converting price to cents and applying 5% fee
             },
             quantity: 1,
         });
@@ -1800,7 +1800,7 @@ app.post('/create-manual-checkout-session-with-extra-quotas', async (req, res) =
                         product_data: {
                             name: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize the first letter
                         },
-                        unit_amount: Math.ceil(parseFloat(value) * 100 * 1.05) // converting price to cents and applying 5% fee
+                        unit_amount: Math.ceil(parseFloat(value) * 100) // converting price to cents and applying 5% fee
                     },
                     quantity: 1,
                 });
