@@ -56,7 +56,7 @@ require('dotenv').config();
 //webhook event handlers
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
 const endpointSecret = `${process.env.WEB_HOOK_SECRET_KEY}`;
-const stripe = require('stripe')(`sk_test_51O9nEuJn0H8EEaz2QY9isNIL03qtNsFXitj5T2tFxU1W30FzdfjilpjNzJXTMQIx9V7OUTXPVntAyGycX3mOzf2X00sE5hrL70`);
+const stripe = require('stripe')(`${process.env.STRIPE_SK}`);
 
 //airTable api keys
 // Replace with your Airtable API key and base ID
