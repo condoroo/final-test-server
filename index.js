@@ -225,6 +225,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
 
                 if (matchingRecord) {
                     let previousDebt = (paymentIntentSucceed.amount_remaining / 100) + (paymentIntentSucceed.amount / 100)
+                    let existingBalanceHistory = matchingRecord.fields["Balance history (for automation)"];
                     let newBalanceHistoryEntry = `Dia ${convertUnixTimestampToDate(paymentIntentSucceed.created)}\n- Novo pagamento de quota = ${paymentIntentSucceed.amount / 100}€\n- Quotas em dívida = ${paymentIntentSucceed.amount_remaining / 100}€ = ${previousDebt}€ (quotas em dívida anteriores) - ${paymentIntentSucceed.amount / 100}€ (novo pagamento de quota)\n`;
                     let updatedBalanceHistory = newBalanceHistoryEntry + (existingBalanceHistory ? existingBalanceHistory : "");
 
