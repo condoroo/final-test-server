@@ -224,6 +224,9 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                 })
 
                 if (matchingRecord) {
+                    let previousDebt = (paymentIntentSucceed.amount_remaining / 100) + (paymentIntentSucceed.amount / 100)
+                    let newBalanceHistoryEntry = `Dia ${convertUnixTimestampToDate(paymentIntentSucceed.created)}\n- Novo pagamento de quota = ${paymentIntentSucceed.amount / 100}€\n- Quotas em dívida = ${paymentIntentSucceed.amount_remaining / 100}€ = ${previousDebt}€ (quotas em dívida anteriores) - ${paymentIntentSucceed.amount / 100}€ (novo pagamento de quota)\n`;
+                    let updatedBalanceHistory = newBalanceHistoryEntry + (existingBalanceHistory ? existingBalanceHistory : "");
 
                     try {
                         const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}/${matchingRecord.id}`;
@@ -233,8 +236,8 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (request, 
                                 "Last successful payment ID (for stripe)": paymentIntentSucceed.id,
                                 "Last successful payment amount (for stripe)": paymentIntentSucceed.amount / 100,
                                 "Last successful payment method (for stripe)": paymentIntentSucceed.payment_method,
-                                "Last outstanding balance (for stripe)": paymentIntentSucceed.amount_remaining / 100
-
+                                "Last outstanding balance (for stripe)": paymentIntentSucceed.amount_remaining / 100,
+                                "Balance history (for automation)": updatedBalanceHistory
                             },
                         };
 
