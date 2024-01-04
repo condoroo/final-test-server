@@ -1513,6 +1513,88 @@ app.post('/save-and-share-file', async (req, res) => {
 //
 //
 
+const ExcelJS = require('exceljs');
+
+// Function to create an Excel file and return as a stream
+async function createExcelFile() {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('My Sheet');
+
+    // Populate your worksheet as needed
+    worksheet.addRow(['Column1', 'Column2']);
+    worksheet.addRow(['Value1', 'Value2']);
+
+    // Write to a stream
+    const buffer = new stream.PassThrough();
+    await workbook.xlsx.write(buffer);
+    buffer.end();
+
+    return buffer;
+}
+
+app.post('/create-excel-and-upload', async (req, res) => {
+    const { folderId, airtableTableName, attachmentFieldName, airtableRecordId } = req.body;
+
+    try {
+        // Authenticate with Google
+        const auth = await authenticate();
+        const drive = google.drive({ version: 'v3', auth });
+
+        // Create an Excel file
+        const bufferStream = await createExcelFile();
+
+        // Check if folder is an array or an element
+        const targetFolderId = Array.isArray(folderId) ? folderId[0] : folderId;
+
+        // Upload the file to Google Drive
+        const fileMetadata = {
+            name: 'MyExcelFile.xlsx',
+            parents: [targetFolderId]
+        };
+
+        const media = {
+            mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            body: bufferStream
+        };
+
+        const file = await drive.files.create({
+            resource: fileMetadata,
+            media: media,
+            fields: 'id'
+        });
+
+        // Make the file readable by anyone with the link
+        await drive.permissions.create({
+            fileId: file.data.id,
+            requestBody: {
+                role: 'reader',
+                type: 'anyone'
+            }
+        });
+
+        // Generate the shareable link
+        const shareableLink = `https://drive.google.com/file/d/${file.data.id}/view`;
+
+        // Update the Airtable Record with the File URL
+        const airtableURL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(airtableTableName)}/${airtableRecordId}`;
+        const updateData = {
+            fields: {
+                [attachmentFieldName]: shareableLink
+            }
+        };
+
+        await axios.patch(airtableURL, updateData, {
+            headers: {
+                Authorization: `Bearer ${AIRTABLE_API_KEY}`
+            }
+        });
+
+        res.json({ fileShareableLink: shareableLink });
+    } catch (error) {
+        console.error('Error in creating and uploading Excel file:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 // ++++++++++++++++++++++++++++++++++
 // Stripe Connect API
