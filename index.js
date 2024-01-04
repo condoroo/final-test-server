@@ -504,6 +504,15 @@ app.post('/create-subscription', async (req, res) => {
         // Define the 'price' variable before using it
         const price = await stripe.prices.create(priceData);
 
+        // Prepare subscription data
+        let subscription_data = {
+            billing_cycle_anchor: unixTimestamp,
+        };
+
+        if (trial_end) {
+            subscription_data.trial_end = trialEndUnixTimestamp;
+        }
+
 
         // Step 3: Create a checkout session
         const session = await stripe.checkout.sessions.create({
@@ -520,10 +529,7 @@ app.post('/create-subscription', async (req, res) => {
                 userName: userName,
             },
             mode: 'subscription',
-            subscription_data: {
-                billing_cycle_anchor: unixTimestamp,
-                // trial_end: trial_end,
-            },
+            subscription_data: subscription_data,
             success_url: `${reDirectUrl}`,
             cancel_url: `${reDirectUrl}`,
 
