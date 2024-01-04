@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch API",
+            "program": "${workspaceFolder}/index.js",
+            "runtimeArgs": [],
+            "cwd": "${workspaceFolder}",
+            "port": 3000 // Set the port your API listens on
+        }
+    ]
+}
