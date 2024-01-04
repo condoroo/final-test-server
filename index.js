@@ -1236,7 +1236,7 @@ app.post('/create-faturas-subfolders', async (req, res) => {
             let month = currentMonth;
             let year = currentYear;
 
-            for (let i = 0; i < 36; i++) {
+            for (let i = 0; i < 24; i++) {
                 // Adjust year and month when necessary
                 if (month > monthsPerYear) {
                     month = 1;
