@@ -1034,8 +1034,7 @@ app.post('/add-pdf-to-drive', async (req, res) => {
     }
 });
 
-
-async function createAndUploadExcel(folderId, airtableTableName, attachmentFieldName, airtableRecordId) {
+const createAndUploadExcel = async (async function createAndUploadExcel(folderId, airtableTableName, attachmentFieldName, airtableRecordId) => {
     try {
         // Authenticate with Google
         const auth = await authenticate();
@@ -1190,7 +1189,8 @@ app.post('/create-folder', async (req, res) => {
             await createSubfolder(folder6, nameOfMonths);
         }
 
-        createAndUploadExcel(folderIds[8], "Condomínios", "Controlo financeiro", recordId);
+        const fileLink = await createAndUploadExcel(folderIds[8], "Condomínios", "Controlo financeiro", recordId);
+        console.log("Excel successfully created", fileLink);
 
         // Update Airtable with folder IDs
         try {
