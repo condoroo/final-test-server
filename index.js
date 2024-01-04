@@ -1034,7 +1034,7 @@ app.post('/add-pdf-to-drive', async (req, res) => {
     }
 });
 
-const createAndUploadExcel = async (async function createAndUploadExcel(folderId, airtableTableName, attachmentFieldName, airtableRecordId) => {
+const createAndUploadExcel = async (folderId, airtableTableName, attachmentFieldName, airtableRecordId) => {
     try {
         // Authenticate with Google
         const auth = await authenticate();
