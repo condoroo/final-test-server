@@ -510,7 +510,7 @@ app.post('/create-subscription', async (req, res) => {
         };
 
         if (trial_end) {
-            subscription_data.trial_end = trialEndUnixTimestamp;
+            subscription_data.trial_end = trial_end;
         }
 
 
