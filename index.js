@@ -1181,6 +1181,9 @@ app.post('/create-folder', async (req, res) => {
             return result;
         }
 
+        const fileLink = await createAndUploadExcel(folderIds[8], "Condomínios", "Controlo financeiro", recordId);
+        console.log("Excel successfully created", fileLink);
+
         const monthsArray = generateMonths();
         console.log(monthsArray);
 
@@ -1188,9 +1191,6 @@ app.post('/create-folder', async (req, res) => {
         for (const nameOfMonths of monthsArray) {
             await createSubfolder(folder6, nameOfMonths);
         }
-
-        const fileLink = await createAndUploadExcel(folderIds[8], "Condomínios", "Controlo financeiro", recordId);
-        console.log("Excel successfully created", fileLink);
 
         // Update Airtable with folder IDs
         try {
