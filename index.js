@@ -1149,48 +1149,8 @@ app.post('/create-folder', async (req, res) => {
             folderIds.push(folderId);
         }
 
-        // Create subfolders inside '6. Faturas'
-        const folder6 = folderIds[5]; // Index 5 corresponds to '6. Faturas'
-
-        function generateMonths() {
-            const monthsPerYear = 12;
-            const result = [];
-
-            // Get current date
-            const currentDate = new Date();
-            const currentMonth = currentDate.getMonth() + 1; // Adding 1 because months are zero-indexed
-            const currentYear = currentDate.getFullYear();
-
-            // Start generating from the current month
-            let month = currentMonth;
-            let year = currentYear;
-
-            for (let i = 0; i < 36; i++) {
-                // Adjust year and month when necessary
-                if (month > monthsPerYear) {
-                    month = 1;
-                    year++;
-                }
-
-                const formattedMonth = `${String(year).slice(2)}.${(month < 10 ? '0' : '') + month} ${new Date(year, month - 1, 1).toLocaleString('default', { month: 'short' })} ${String(year).slice(2)}`;
-                result.push(formattedMonth);
-
-                month++;
-            }
-
-            return result;
-        }
-
         const fileLink = await createAndUploadExcel(folderIds[8], "Condomínios", "Controlo financeiro", recordId);
         console.log("Excel successfully created", fileLink);
-
-        const monthsArray = generateMonths();
-        console.log(monthsArray);
-
-        // Create subfolders for each month inside '6. Faturas'
-        for (const nameOfMonths of monthsArray) {
-            await createSubfolder(folder6, nameOfMonths);
-        }
 
         // Update Airtable with folder IDs
         try {
@@ -1237,6 +1197,77 @@ app.post('/create-folder', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+// Route to create subfolders inside 'Faturas'
+app.post('/create-faturas-subfolders', async (req, res) => {
+    const { folderId } = req.body; // ID of the 'Faturas' folder
+
+    try {
+        const auth = await authenticate();
+        const drive = google.drive({ version: 'v3', auth });
+
+        // Helper function to create a subfolder
+        const createSubfolder = async (parentFolderId, folderName) => {
+            const folderMetadata = {
+                name: folderName,
+                mimeType: 'application/vnd.google-apps.folder',
+                parents: [parentFolderId],
+            };
+
+            const folder = await drive.files.create({
+                resource: folderMetadata,
+                fields: 'id',
+            });
+
+            return folder.data.id;
+        };
+
+        // Function to generate formatted month names
+        const generateMonths = () => {
+            const monthsPerYear = 12;
+            const result = [];
+
+            // Get current date
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth() + 1; // Adding 1 because months are zero-indexed
+            const currentYear = currentDate.getFullYear();
+
+            // Start generating from the current month
+            let month = currentMonth;
+            let year = currentYear;
+
+            for (let i = 0; i < 36; i++) {
+                // Adjust year and month when necessary
+                if (month > monthsPerYear) {
+                    month = 1;
+                    year++;
+                }
+
+                const formattedMonth = `${String(year).slice(2)}.${(month < 10 ? '0' : '') + month} ${new Date(year, month - 1, 1).toLocaleString('default', { month: 'short' })} ${String(year).slice(2)}`;
+                result.push(formattedMonth);
+
+                month++;
+            }
+
+            return result;
+        };
+
+        // Generate array of month names
+        const monthsArray = generateMonths();
+
+        console.log(monthsArray);
+
+        // Create subfolders for each month inside 'Faturas'
+        const folderCreationPromises = monthsArray.map(monthName => createSubfolder(folderId, monthName));
+        await Promise.all(folderCreationPromises);
+
+        res.json({ message: 'Subfolders created successfully inside Faturas' });
+    } catch (error) {
+        console.error('Error creating subfolders in Faturas:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 
 
 
