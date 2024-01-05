@@ -10,6 +10,10 @@ const port = 3000;
 app.use(cors());
 require('dotenv').config();
 
+// Webhooks must be used before express.json() parsing the data
+const stripeWebhookRoutes = require('./routes/webhookStripeRoutes');
+app.use(stripeWebhookRoutes);
+
 /////////////-----------------
 app.use(express.json());
 // Define a sample route
@@ -18,13 +22,11 @@ app.get('/', (req, res) => {
 });
 
 const stripeRoutes = require('./routes/stripeRoutes');
-const stripeWebhookRoutes = require('./routes/webhookStripeRoutes');
 const airtableRoutes = require('./routes/airtableRoutes');
 const driveRoutes = require('./routes/driveRoutes');
 const invoiceRoutes = require('./routes/phcInvoiceRoutes');
 
 app.use(stripeRoutes);
-app.use(stripeWebhookRoutes);
 app.use(airtableRoutes);
 app.use(driveRoutes);
 app.use(invoiceRoutes);
