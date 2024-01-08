@@ -1,5 +1,4 @@
 // Import required modules
-// teste
 const express = require('express');
 const cors = require('cors');
 
