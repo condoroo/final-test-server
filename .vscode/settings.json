@@ -1,3 +1,8 @@
 {
-    "docify.commentService.inlineComments": true
+    "docify.commentService.inlineComments": true,
+
+    "editor.formatOnSave": true,
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
 }
